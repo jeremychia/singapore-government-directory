@@ -49,7 +49,7 @@ class HTMLParser:
 
         return section_info_divs
 
-    def extract_name_info(self, department):
+    def extract_name_info(self, department, url):
         soup = BeautifulSoup(self.html, "html.parser")
         info_list = []
         section_divs = []
@@ -77,6 +77,7 @@ class HTMLParser:
                                     "name": name,
                                     "email": email,
                                     "department": department,
+                                    "url": url
                                 }
                             )
 

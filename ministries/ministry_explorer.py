@@ -11,7 +11,7 @@ class MinistryExplorer:
         downloader = HTMLDownloader(url)
         html_content = downloader.download_html()
         parser = HTMLParser(html_content)
-        name_info = parser.extract_name_info(department=parent_department)
+        name_info = parser.extract_name_info(department=parent_department, url=url)
         department_info = parser.extract_departments(
             parent_department=parent_department
         )
