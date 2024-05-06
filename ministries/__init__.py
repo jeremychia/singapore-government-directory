@@ -1,0 +1,18 @@
+ministries_url = {
+    "Ministry of Communications and Information": "https://www.sgdi.gov.sg/ministries/mci",
+    "Ministry of Culture, Community and Youth": "https://www.sgdi.gov.sg/ministries/mccy",
+    "Ministry of Defence": "https://www.sgdi.gov.sg/ministries/mindef",
+    "Ministry of Education": "https://www.sgdi.gov.sg/ministries/moe",
+    "Ministry of Finance": "https://www.sgdi.gov.sg/ministries/mof",
+    "Ministry of Foreign Affairs": "https://www.sgdi.gov.sg/ministries/mfa",
+    "Ministry of Health": "https://www.sgdi.gov.sg/ministries/moh",
+    "Ministry of Home Affairs": "https://www.sgdi.gov.sg/ministries/mha",
+    "Ministry of Law": "https://www.sgdi.gov.sg/ministries/minlaw",
+    "Ministry of Manpower": "https://www.sgdi.gov.sg/ministries/mom",
+    "Ministry of National Devleopment": "https://www.sgdi.gov.sg/ministries/mnd",
+    "Ministry of Social and Family Development": "https://www.sgdi.gov.sg/ministries/msf",
+    "Ministry of Sustainability and the Environment": "https://www.sgdi.gov.sg/ministries/mse",
+    "Ministry of Trade and Industry": "https://www.sgdi.gov.sg/ministries/mti",
+    "Ministry of Transport": "https://www.sgdi.gov.sg/ministries/mot",
+    "Prime Minister's Office": "https://www.sgdi.gov.sg/ministries/pmo",
+}
