@@ -22,8 +22,9 @@ def unwrap_tree(department, parent_name=None):
 
 
 def add_timestamp(df):
-    df["_accessed_at"] = datetime.now()
-    return df
+    current_datetime = datetime.now()
+    df["_accessed_at"] = current_datetime
+    return df, current_datetime
 
 
 def add_ministry(df, ministry_name):
