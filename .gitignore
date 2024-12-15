@@ -1,7 +1,8 @@
-# all tokens
 token/
+**/token/
+logs/
+
 
 # Ignore Python bytecode files
 **/__pycache__/
 
-logs/
