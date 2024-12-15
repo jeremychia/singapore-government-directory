@@ -6,7 +6,7 @@ with
 
     extraction_sessions as (
         select session_id, first_completion_of_session, last_completion_of_session,
-        from {{ ref("dim_extraction_sessions") }}
+        from {{ ref("fact_extraction_sessions") }}
     ),
 
     enrich_with_session_order as (
