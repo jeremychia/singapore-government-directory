@@ -1,7 +1,7 @@
 ministries_url = {
-    "Ministry of Communications and Information": "https://www.sgdi.gov.sg/ministries/mci",
     "Ministry of Culture, Community and Youth": "https://www.sgdi.gov.sg/ministries/mccy",
     "Ministry of Defence": "https://www.sgdi.gov.sg/ministries/mindef",
+    "Ministry of Digital Development and Information": "https://www.sgdi.gov.sg/ministries/mddi",
     "Ministry of Education": "https://www.sgdi.gov.sg/ministries/moe",
     "Ministry of Finance": "https://www.sgdi.gov.sg/ministries/mof",
     "Ministry of Foreign Affairs": "https://www.sgdi.gov.sg/ministries/mfa",
