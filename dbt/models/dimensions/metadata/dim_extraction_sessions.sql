@@ -1,4 +1,4 @@
-{% set threshold_days_between_sessions = 0.9 %}
+{% set threshold_days_between_sessions = 0.7 %}
 
 with
     stg_metadata as (
@@ -111,7 +111,7 @@ with
 
     post_processing as (
         select
-            row_number() over (order by first_completion_of_session) as session_order,
+            row_number() over (order by first_completion_of_session) as session_id,
             first_completion_of_session,
             last_completion_of_session,
             round(
