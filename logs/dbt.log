@@ -1,0 +1,40 @@
+[0m21:18:15.899242 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x107791a20>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x114907ca0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x114907eb0>]}
+
+
+============================== 21:18:15.901469 | cba4cd2e-1e8a-4a2c-8758-d78fdd7041c9 ==============================
+[0m21:18:15.901469 [info ] [MainThread]: Running with dbt=1.7.13
+[0m21:18:15.901861 [debug] [MainThread]: running dbt with arguments {'printer_width': '80', 'indirect_selection': 'eager', 'write_json': 'True', 'log_cache_events': 'False', 'partial_parse': 'True', 'cache_selected_only': 'False', 'warn_error': 'None', 'debug': 'False', 'fail_fast': 'False', 'log_path': 'logs', 'version_check': 'True', 'profiles_dir': '/Users/jeremy.chia/.dbt', 'use_colors': 'True', 'use_experimental_parser': 'False', 'no_print': 'None', 'quiet': 'False', 'log_format': 'default', 'invocation_command': 'dbt debug', 'static_parser': 'True', 'introspect': 'True', 'target_path': 'None', 'warn_error_options': 'WarnErrorOptions(include=[], exclude=[])', 'send_anonymous_usage_stats': 'True'}
+[0m21:18:15.902240 [info ] [MainThread]: dbt version: 1.7.13
+[0m21:18:15.902482 [info ] [MainThread]: python version: 3.10.9
+[0m21:18:15.902695 [info ] [MainThread]: python path: /Users/jeremy.chia/.pyenv/versions/3.10.9/bin/python3.10
+[0m21:18:15.902908 [info ] [MainThread]: os info: macOS-14.7.1-arm64-arm-64bit
+[0m21:18:16.408746 [info ] [MainThread]: Using profiles dir at /Users/jeremy.chia/.dbt
+[0m21:18:16.409098 [info ] [MainThread]: Using profiles.yml file at /Users/jeremy.chia/.dbt/profiles.yml
+[0m21:18:16.409335 [info ] [MainThread]: Using dbt_project.yml file at /Users/jeremy.chia/Documents/Github/singapore-government-directory/dbt_project.yml
+[0m21:18:16.409602 [error] [MainThread]: Encountered an error:
+Internal Error
+  Profile should not be None if loading profile completed
+[0m21:18:16.410633 [debug] [MainThread]: Resource report: {"command_name": "debug", "command_wall_clock_time": 0.54901546, "process_user_time": 1.906377, "process_kernel_time": 2.488396, "process_mem_max_rss": "190742528", "command_success": false, "process_in_blocks": "0", "process_out_blocks": "0"}
+[0m21:18:16.410979 [debug] [MainThread]: Command `dbt debug` failed at 21:18:16.410900 after 0.55 seconds
+[0m21:18:16.411210 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x107791a20>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x1138d2aa0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x16ffaa8f0>]}
+[0m21:18:16.411481 [debug] [MainThread]: Flushing usage events
+[0m21:21:46.198653 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x102b91a20>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x105a07c40>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x105a07e50>]}
+
+
+============================== 21:21:46.200917 | 5ab1b544-0669-46c3-921b-8344fd117697 ==============================
+[0m21:21:46.200917 [info ] [MainThread]: Running with dbt=1.7.13
+[0m21:21:46.201289 [debug] [MainThread]: running dbt with arguments {'printer_width': '80', 'indirect_selection': 'eager', 'log_cache_events': 'False', 'write_json': 'True', 'partial_parse': 'True', 'cache_selected_only': 'False', 'profiles_dir': '/Users/jeremy.chia/.dbt', 'fail_fast': 'False', 'debug': 'False', 'log_path': 'logs', 'warn_error': 'None', 'version_check': 'True', 'use_colors': 'True', 'use_experimental_parser': 'False', 'no_print': 'None', 'quiet': 'False', 'log_format': 'default', 'static_parser': 'True', 'introspect': 'True', 'warn_error_options': 'WarnErrorOptions(include=[], exclude=[])', 'target_path': 'None', 'invocation_command': 'dbt debug', 'send_anonymous_usage_stats': 'True'}
+[0m21:21:46.201732 [info ] [MainThread]: dbt version: 1.7.13
+[0m21:21:46.201952 [info ] [MainThread]: python version: 3.10.9
+[0m21:21:46.202157 [info ] [MainThread]: python path: /Users/jeremy.chia/.pyenv/versions/3.10.9/bin/python3.10
+[0m21:21:46.202361 [info ] [MainThread]: os info: macOS-14.7.1-arm64-arm-64bit
+[0m21:21:46.707903 [info ] [MainThread]: Using profiles dir at /Users/jeremy.chia/.dbt
+[0m21:21:46.708303 [info ] [MainThread]: Using profiles.yml file at /Users/jeremy.chia/.dbt/profiles.yml
+[0m21:21:46.708543 [info ] [MainThread]: Using dbt_project.yml file at /Users/jeremy.chia/Documents/Github/singapore-government-directory/dbt_project.yml
+[0m21:21:46.708819 [error] [MainThread]: Encountered an error:
+Internal Error
+  Profile should not be None if loading profile completed
+[0m21:21:46.710017 [debug] [MainThread]: Resource report: {"command_name": "debug", "command_wall_clock_time": 0.5535123, "process_user_time": 1.860393, "process_kernel_time": 2.711701, "process_mem_max_rss": "192397312", "command_success": false, "process_in_blocks": "0", "process_out_blocks": "0"}
+[0m21:21:46.710363 [debug] [MainThread]: Command `dbt debug` failed at 21:21:46.710282 after 0.55 seconds
+[0m21:21:46.710608 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x102b91a20>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x1050d2a10>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x105a073a0>]}
+[0m21:21:46.710854 [debug] [MainThread]: Flushing usage events
