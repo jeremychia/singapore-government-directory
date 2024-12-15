@@ -12,8 +12,8 @@ os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "token/gcp_token.json"
 
 ministries_url = ministries.ministries_url
 
-project_id = "singapore-parliament-speeches"
-schema = "sg_govt_dir"
+project_id = "singapore-government-directory"
+schema = "raw"
 
 # download data
 
@@ -76,12 +76,12 @@ for ministry_name, url in ministries_url.items():
 
 # process names
 
-project_id = "singapore-parliament-speeches"
-schema = "sg_govt_dir_preprocess"
+project_id = "singapore-government-directory"
+schema = "preprocessed"
 
 query = """
 select *
-from `sg_govt_dir.names`
+from `raw.names`
 """
 
 names_all = pandas_gbq.read_gbq(query, project_id)
