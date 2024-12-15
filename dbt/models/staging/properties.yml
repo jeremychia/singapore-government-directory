@@ -1,0 +1,15 @@
+sources:
+  - name: raw
+    config:
+      enabled: true
+    tables:
+      - name: departments
+      - name: names
+      - name: metadata
+  - name: preprocessed
+    config:
+      enabled: true
+    tables:
+      - name: names_mapping
+      - name: prefixes_history
+      - name: postfixes_history
