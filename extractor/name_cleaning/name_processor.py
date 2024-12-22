@@ -1,3 +1,6 @@
+import re
+
+
 class PrefixExtractor:
     COMMON_PREFIXES = ["ms", "mr", "dr", "mdm", "miss", "mrs"]
     ACADEMIC_PREFIXES = [
@@ -144,16 +147,27 @@ class NameCleaner:
             name = name[len(prefix) + 1 :]  # Remove prefix along with space
         if postfix:
             name = name[: -len(postfix)]  # Remove postfix
-
         return name.strip().rstrip(",")
+
+    @staticmethod
+    def remove_html_tags_brackets_and_standalone_hyphens(name):
+        # Remove HTML tags
+        name = re.sub(r"<.*?>", "", name)
+        # Remove brackets and their content, including any trailing whitespace
+        name = re.sub(r"\s*\[.*?\]|\s*\(.*?\)|\s*\{.*?\}", "", name)
+        # Remove standalone hyphens (surrounded by spaces or at the start/end)
+        name = re.sub(r"(^|\s)-(\s|$)", " ", name).strip()
+        return name
 
 
 class NameProcessor:
     @staticmethod
     def clean_name(row):
-        return NameCleaner.remove_prefix_postfix(
+        name = NameCleaner.remove_prefix_postfix(
             row["name"], row["prefix"], row["postfix"]
         )
+        name = NameCleaner.remove_html_tags_brackets_and_standalone_hyphens(name)
+        return name
 
     @classmethod
     def process_names(cls, names_df):
