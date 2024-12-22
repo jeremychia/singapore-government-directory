@@ -118,6 +118,7 @@ if __name__ == "__main__":
             pipeline.process_and_upload()
 
     if config["run"]["name_cleaning"]:
+        print(message)
         print("running name cleaner: ...")
         cleaning = NameProcessorPipeline()
         cleaning.run()
