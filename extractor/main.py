@@ -4,6 +4,7 @@ from typing import Tuple
 
 from ministries import ministries_url
 from ministries.pipeline import MinistryDataProcessor
+from name_cleaning.pipeline import NameProcessorPipeline
 from validate_arguments import validate_ministry
 
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "token/gcp_token.json"
@@ -118,3 +119,5 @@ if __name__ == "__main__":
 
     if config["run"]["name_cleaning"]:
         print("running name cleaner: ...")
+        cleaning = NameProcessorPipeline()
+        cleaning.run()

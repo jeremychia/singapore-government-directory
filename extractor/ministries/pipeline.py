@@ -1,6 +1,6 @@
 import pandas as pd
 import utils
-from gbq import PROJECT_ID, upload_to_bigquery
+from gbq import PROJECT_ID, append_in_bigquery
 from ministries.ministry_explorer import MinistryExplorer
 
 
@@ -71,6 +71,6 @@ class MinistryDataProcessor:
             names_df, departments_df, names_datetime, departments_datetime
         )
 
-        upload_to_bigquery(names_df, "names")
-        upload_to_bigquery(departments_df, "departments")
-        upload_to_bigquery(metadata_df, "metadata")
+        append_in_bigquery(names_df, self.project_id, self.schema, "names")
+        append_in_bigquery(departments_df, self.project_id, self.schema, "departments")
+        append_in_bigquery(metadata_df, self.project_id, self.schema, "metadata")
