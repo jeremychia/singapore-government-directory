@@ -66,7 +66,12 @@ class PrefixExtractor:
         "prof",
     ]
     # manual exclusions, because they break the logic
-    EXCLUDE_NAMES = ["Egwin LIAN (MR)", "Amos Kow (MR)", "Gladys CHIAM (Ms)"]
+    EXCLUDE_NAMES = [
+        "Egwin LIAN (MR)",
+        "Amos Kow (MR)",
+        "Gladys CHIAM (Ms)",
+        "Ailene CHOU (Ms)",
+    ]
 
     @staticmethod
     def extract(name):
