@@ -150,13 +150,15 @@ class NameCleaner:
         return name.strip().rstrip(",")
 
     @staticmethod
-    def remove_html_tags_brackets_and_standalone_hyphens(name):
+    def remove_html_tags_brackets_hyphens_and_vacant(name):
         # Remove HTML tags
         name = re.sub(r"<.*?>", "", name)
         # Remove brackets and their content, including any trailing whitespace
         name = re.sub(r"\s*\[.*?\]|\s*\(.*?\)|\s*\{.*?\}", "", name)
         # Remove standalone hyphens (surrounded by spaces or at the start/end)
         name = re.sub(r"(^|\s)-(\s|$)", " ", name).strip()
+        # Remove the word "VACANT" (case insensitive)
+        name = re.sub(r"\bVACANT\b", "", name, flags=re.IGNORECASE).strip()
         return name
 
 
@@ -166,7 +168,7 @@ class NameProcessor:
         name = NameCleaner.remove_prefix_postfix(
             row["name"], row["prefix"], row["postfix"]
         )
-        name = NameCleaner.remove_html_tags_brackets_and_standalone_hyphens(name)
+        name = NameCleaner.remove_html_tags_brackets_hyphens_and_vacant(name)
         return name
 
     @classmethod
