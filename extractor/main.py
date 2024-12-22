@@ -1,12 +1,13 @@
-import pandas as pd
-import pandas_gbq
-import numpy as np
+import argparse
 import os
 
-import utils
-from utils.names import NameProcessor
 import ministries
+import numpy as np
+import pandas as pd
+import pandas_gbq
+import utils
 from ministries.ministry_explorer import MinistryExplorer
+from utils.names import NameProcessor
 
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "token/gcp_token.json"
 
@@ -50,7 +51,7 @@ for ministry_name, url in ministries_url.items():
         project_id=project_id,
         if_exists="append",
     )
-    
+
     ## metadata
 
     table_name = ["names", "departments"]
