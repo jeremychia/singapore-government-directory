@@ -65,7 +65,7 @@ class NameProcessorPipeline:
         # Step 4: Create and save postfixes history
         print("Processing: Postfixes History")
         postfixes_history = self.create_history(
-            names_all, ["extracted_name", "postfix"]
+            names_all, ["name", "extracted_name", "postfix"]
         )
         save_to_bigquery(
             postfixes_history, self.project_id, self.schema, "postfixes_history"
@@ -73,7 +73,9 @@ class NameProcessorPipeline:
 
         # Step 5: Create and save prefixes history
         print("Processing: Prefixes History")
-        prefixes_history = self.create_history(names_all, ["extracted_name", "prefix"])
+        prefixes_history = self.create_history(
+            names_all, ["name", "extracted_name", "prefix"]
+        )
         save_to_bigquery(
             prefixes_history, self.project_id, self.schema, "prefixes_history"
         )
