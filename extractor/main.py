@@ -1,132 +1,114 @@
 import argparse
 import os
+from typing import Tuple
 
-import ministries
-import numpy as np
-import pandas as pd
-import pandas_gbq
-import utils
-from ministries.ministry_explorer import MinistryExplorer
-from utils.names import NameProcessor
+from ministries import ministries_url
+from validate_arguments import validate_ministry
 
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "token/gcp_token.json"
+ministry_names = list(ministries_url.keys())
 
-ministries_url = ministries.ministries_url
 
-project_id = "singapore-government-directory"
-schema = "raw"
-
-# download data
-
-for ministry_name, url in ministries_url.items():
-    explorer = MinistryExplorer(ministry_name, url)
-    names, departments = explorer.explore_ministries()
-
-    ## names
-
-    names_df = pd.DataFrame(names)
-    names_df = utils.add_ministry(names_df, ministry_name)
-    names_df, names_datetime = utils.add_timestamp(names_df)
-
-    pandas_gbq.to_gbq(
-        names_df,
-        destination_table=f"{schema}.names",
-        project_id=project_id,
-        if_exists="append",
+def parse_arguments() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Singapore Government Directory Extracter"
     )
 
-    ## departments
-
-    rows = []
-    for department in departments:
-        rows.extend(utils.unwrap_tree(department))
-
-    departments_df = pd.DataFrame(rows)
-    departments_df = utils.add_ministry(departments_df, ministry_name)
-    departments_df, departments_datetime = utils.add_timestamp(departments_df)
-
-    pandas_gbq.to_gbq(
-        departments_df,
-        destination_table=f"{schema}.departments",
-        project_id=project_id,
-        if_exists="append",
+    parser.add_argument(
+        "--extractor",
+        "-e",
+        action="store_true",
+        required=False,
+        help="Use this flag to run the name cleaner",
     )
 
-    ## metadata
-
-    table_name = ["names", "departments"]
-    ministry_name = [ministry_name] * len(table_name)
-    num_rows = [len(names_df), len(departments_df)]
-    accessed_at = [names_datetime, departments_datetime]
-
-    metadata_df = pd.DataFrame(
-        {
-            "table_name": table_name,
-            "ministry_name": ministry_name,
-            "num_rows": num_rows,
-            "_accessed_at": accessed_at,
-        }
+    parser.add_argument(
+        "--ministry",
+        "-m",
+        nargs="+",
+        type=validate_ministry,
+        required=False,
+        help="Key in full name of ministry to extract from. If blank, extracts from all ministries.",
     )
 
-    pandas_gbq.to_gbq(
-        metadata_df,
-        destination_table=f"{schema}.metadata",
-        project_id=project_id,
-        if_exists="append",
+    parser.add_argument(
+        "--resume_run",
+        "-rr",
+        action="store_true",
+        required=False,
+        help="Used when a run breaks and is to be continued",
     )
 
-# process names
+    parser.add_argument(
+        "--name_cleaning",
+        "-nc",
+        action="store_true",
+        required=False,
+        help="Use this flag to run the name cleaner",
+    )
 
-project_id = "singapore-government-directory"
-schema = "preprocessed"
+    return parser.parse_args()
 
-query = """
-select *
-from `raw.names`
-"""
 
-names_all = pandas_gbq.read_gbq(query, project_id)
-NameProcessor.process_names(names_all)
+def initialise_config(args: argparse.Namespace) -> Tuple[str, dict]:
+    config = {
+        "run": {},
+        "ministries": ministry_names if ministry_names else [],
+    }
 
-print("Processing: Names Mapping")
-names_mapping = (
-    names_all[["extracted_name", "name"]]
-    .drop_duplicates()
-    .reset_index(inplace=False)
-    .drop("index", axis=1)
-)
+    message = "Configurations:\n"
 
-pandas_gbq.to_gbq(
-    names_mapping,
-    destination_table=f"{schema}.names_mapping",
-    project_id=project_id,
-    if_exists="replace",
-)
+    # Extractor flag
+    if args.extractor:
+        config["run"]["extractor"] = True
+        message += "[y]\twill run extractor\n"
 
-print("Processing: Postfixes History")
-postfixes_history = (
-    names_all.groupby(["extracted_name", "postfix"])
-    .agg(effective_from=("_accessed_at", np.min), effective_to=("_accessed_at", np.max))
-    .reset_index()
-)
+        if args.ministry:
+            if args.resume_run:
+                config["ministries"] = ministry_names[
+                    ministry_names.index(args.ministry[0]) :
+                ]
+                message += (
+                    "[y]\tministries specified with resume run, "
+                    f"will run from {args.ministry[0]}, i.e.: {config['ministries']}\n"
+                )
+            else:
+                config["ministries"] = args.ministry
+                message += (
+                    f"[y]\tministries specified, will run {config['ministries']}\n"
+                )
 
-pandas_gbq.to_gbq(
-    postfixes_history,
-    destination_table=f"{schema}.postfixes_history",
-    project_id=project_id,
-    if_exists="replace",
-)
+        elif ministry_names:
+            message += "[y]\tno ministries specified, will run all\n"
+        else:
+            message += "[n]\tno ministries specified, no default available\n"
 
-print("Processing: Prefixes History")
-prefixes_history = (
-    names_all.groupby(["extracted_name", "prefix"])
-    .agg(effective_from=("_accessed_at", np.min), effective_to=("_accessed_at", np.max))
-    .reset_index()
-)
+    else:
+        config["run"]["extractor"] = False
+        message += "[n]\tno extraction\n"
+        if args.ministry:
+            message += (
+                "[!]\tno extraction will be run without the flag --extractor or -e\n"
+            )
 
-pandas_gbq.to_gbq(
-    prefixes_history,
-    destination_table=f"{schema}.prefixes_history",
-    project_id=project_id,
-    if_exists="replace",
-)
+    # Name cleaning flag
+    if args.name_cleaning:
+        config["run"]["name_cleaning"] = True
+        message += "[y]\twill perform name cleaning\n"
+    else:
+        config["run"]["name_cleaning"] = False
+        message += "[n]\tno name cleaning\n"
+
+    return message, config
+
+
+if __name__ == "__main__":
+    args = parse_arguments()
+    message, config = initialise_config(args)
+    print(message)
+
+    if config["run"]["extractor"]:
+        print("running extractor: ...")
+
+    if config["run"]["name_cleaning"]:
+        print("running name cleaner: ...")
