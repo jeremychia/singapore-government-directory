@@ -3,6 +3,7 @@ import os
 from typing import Tuple
 
 from ministries import ministries_url
+from ministries.pipeline import MinistryDataProcessor
 from validate_arguments import validate_ministry
 
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "token/gcp_token.json"
@@ -105,10 +106,15 @@ def initialise_config(args: argparse.Namespace) -> Tuple[str, dict]:
 if __name__ == "__main__":
     args = parse_arguments()
     message, config = initialise_config(args)
-    print(message)
 
     if config["run"]["extractor"]:
-        print("running extractor: ...")
+        for ministry_name, url in ministries_url.items():
+            print(message)
+            print(
+                f"starting extraction for:\t{ministry_name}\n" f"from url:\t\t\t{url}\n"
+            )
+            pipeline = MinistryDataProcessor(ministry_name, url)
+            pipeline.process_and_upload()
 
     if config["run"]["name_cleaning"]:
         print("running name cleaner: ...")
