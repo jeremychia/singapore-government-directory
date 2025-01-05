@@ -110,12 +110,16 @@ if __name__ == "__main__":
 
     if config["run"]["extractor"]:
         for ministry_name, url in ministries_url.items():
-            print(message)
-            print(
-                f"starting extraction for:\t{ministry_name}\n" f"from url:\t\t\t{url}\n"
-            )
-            pipeline = MinistryDataProcessor(ministry_name, url)
-            pipeline.process_and_upload()
+            if ministry_name not in config["ministries"]:
+                continue
+            else:
+                print(message)
+                print(
+                    f"starting extraction for:\t{ministry_name}\n"
+                    f"from url:\t\t\t{url}\n"
+                )
+                pipeline = MinistryDataProcessor(ministry_name, url)
+                pipeline.process_and_upload()
 
     if config["run"]["name_cleaning"]:
         print("running name cleaner: ...")
