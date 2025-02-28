@@ -5,6 +5,7 @@ from typing import Tuple
 from ministries import ministries_url
 from ministries.pipeline import MinistryDataProcessor
 from name_cleaning.pipeline import NameProcessorPipeline
+from slowly_changing_dimensions.pipeline import ConvertToSCD
 from validate_arguments import validate_ministry
 
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "token/gcp_token.json"
@@ -39,6 +40,14 @@ def parse_arguments() -> argparse.Namespace:
         action="store_true",
         required=False,
         help="Used when a run breaks and is to be continued",
+    )
+
+    parser.add_argument(
+        "--slowly_changing_dimensions",
+        "-scd",
+        action="store_true",
+        required=False,
+        help="Use this flag to run the slowly changing dimension convertor",
     )
 
     parser.add_argument(
@@ -93,6 +102,14 @@ def initialise_config(args: argparse.Namespace) -> Tuple[str, dict]:
                 "[!]\tno extraction will be run without the flag --extractor or -e\n"
             )
 
+    # SCD flag
+    if args.slowly_changing_dimensions:
+        config["run"]["slowly_changing_dimensions"] = True
+        message += "[y]\twill perform SCD processing\n"
+    else:
+        config["run"]["slowly_changing_dimensions"] = False
+        message += "[y]\tno SCD processing\n"
+
     # Name cleaning flag
     if args.name_cleaning:
         config["run"]["name_cleaning"] = True
@@ -120,6 +137,11 @@ if __name__ == "__main__":
                 )
                 pipeline = MinistryDataProcessor(ministry_name, url)
                 pipeline.process_and_upload()
+
+    if config["run"]["slowly_changing_dimensions"]:
+        print("running SCD processor: ...")
+        convert_scd = ConvertToSCD()
+        convert_scd.process_and_upload()
 
     if config["run"]["name_cleaning"]:
         print("running name cleaner: ...")
