@@ -32,8 +32,8 @@ class NameProcessorPipeline:
         return (
             names_all.groupby(group_by_columns)
             .agg(
-                effective_from=("_accessed_at", np.min),
-                effective_to=("_accessed_at", np.max),
+                effective_from=("_valid_from", np.min),
+                effective_to=("_valid_to", np.max),
             )
             .reset_index()
         )
@@ -42,13 +42,8 @@ class NameProcessorPipeline:
     def run(self):
         # only extract minimum and maximum values, as in-between values do not matter
         query = """
-        select name, min(_accessed_at) _accessed_at
-        from `raw.names`
-        group by all
-        union all
-        select name, max(_accessed_at) as _accessed_at
-        from `raw.names`
-        group by all
+        select name, _valid_from, _valid_to
+        from `singapore-government-directory.scd.names`
         """
 
         # Step 1: Fetch data
