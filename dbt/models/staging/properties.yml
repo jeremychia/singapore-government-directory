@@ -1,4 +1,10 @@
 sources:
+  - name: scd
+    config:
+      enabled: true
+    tables:
+      - name: departments
+      - name: names
   - name: raw
     config:
       enabled: true
