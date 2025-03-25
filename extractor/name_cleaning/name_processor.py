@@ -65,6 +65,7 @@ class PrefixExtractor:
         "(mrs)",
         "(mdm)",
         "prof",
+        "(dr)",
     ]
     # manual exclusions, because they break the logic
     EXCLUDE_NAMES = ["Egwin LIAN (MR)", "Amos Kow (MR)", "Gladys CHIAM (Ms)"]
