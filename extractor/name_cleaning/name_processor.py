@@ -8,6 +8,7 @@ class PrefixExtractor:
         "a/prof",
         "assoc",
         "professor",
+        "a/p",
     ]
     RANK_PREFIXES = [
         "insp",
