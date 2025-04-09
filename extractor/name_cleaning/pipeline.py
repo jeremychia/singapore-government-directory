@@ -21,7 +21,7 @@ class NameProcessorPipeline:
     # Function to create a names mapping
     def create_names_mapping(self, names_all):
         return (
-            names_all[["extracted_name", "name"]]
+            names_all[["extracted_name", "name", "email"]]
             .drop_duplicates()
             .reset_index(inplace=False)
             .drop("index", axis=1)
@@ -42,7 +42,7 @@ class NameProcessorPipeline:
     def run(self):
         # only extract minimum and maximum values, as in-between values do not matter
         query = """
-        select name, _valid_from, _valid_to
+        select name, lower(email) as email, _valid_from, _valid_to
         from `singapore-government-directory.scd.names`
         """
 
@@ -60,7 +60,7 @@ class NameProcessorPipeline:
         # Step 4: Create and save postfixes history
         print("Processing: Postfixes History")
         postfixes_history = self.create_history(
-            names_all, ["extracted_name", "postfix"]
+            names_all, ["email", "extracted_name", "postfix"]
         )
         save_to_bigquery(
             postfixes_history, self.project_id, self.schema, "postfixes_history"
@@ -68,7 +68,9 @@ class NameProcessorPipeline:
 
         # Step 5: Create and save prefixes history
         print("Processing: Prefixes History")
-        prefixes_history = self.create_history(names_all, ["extracted_name", "prefix"])
+        prefixes_history = self.create_history(
+            names_all, ["email", "extracted_name", "prefix"]
+        )
         save_to_bigquery(
             prefixes_history, self.project_id, self.schema, "prefixes_history"
         )
