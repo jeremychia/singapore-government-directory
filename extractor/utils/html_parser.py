@@ -70,7 +70,7 @@ class HTMLParser:
                         position = self._extract_position(li_tag)
                         name = self._extract_personnel_name(li_tag)
                         email = self._extract_email(li_tag)
-                        if position and name and email:
+                        if position and name: # no need email to be present
                             info_list.append(
                                 {
                                     "position": position,
