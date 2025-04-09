@@ -16,3 +16,16 @@ ministries_url = {
     "Ministry of Transport": "https://www.sgdi.gov.sg/ministries/mot",
     "Prime Minister's Office": "https://www.sgdi.gov.sg/ministries/pmo",
 }
+
+organs_of_state_url = {
+    "ATTORNEY-GENERAL'S CHAMBERS": "https://www.sgdi.gov.sg/organs-of-state/agc",
+    "AUDITOR-GENERAL'S OFFICE": "https://www.sgdi.gov.sg/organs-of-state/ago",
+    "INDUSTRIAL ARBITRATION COURT": "https://www.sgdi.gov.sg/organs-of-state/iac",
+    "ISTANA": "https://www.sgdi.gov.sg/organs-of-state/istana",
+    "JUDICIARY, FAMILY JUSTICE COURTS": "https://www.sgdi.gov.sg/organs-of-state/fjcourts",
+    "JUDICIARY, STATE COURTS": "https://www.sgdi.gov.sg/organs-of-state/state-courts",
+    "JUDICIARY, SUPREME COURT": "https://www.sgdi.gov.sg/organs-of-state/supcourt",
+    "PARLIAMENT OF SINGAPORE": "https://www.sgdi.gov.sg/organs-of-state/parl",
+    "PUBLIC SERVICE COMMISSION": "https://www.sgdi.gov.sg/organs-of-state/psc",
+    "THE CABINET": "https://www.sgdi.gov.sg/organs-of-state/cab",
+}
