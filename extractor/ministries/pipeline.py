@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import pandas as pd
 import utils
 from gbq import PROJECT_ID, append_in_bigquery
@@ -21,19 +23,19 @@ class MinistryDataProcessor:
         self.explorer = MinistryExplorer(ministry_name, url)
         logger.debug(f"Initialized MinistryDataProcessor for {ministry_name}")
 
-    def process_names(self, names):
+    def process_names(self, names, timestamp):
         """Process the names data: add ministry and timestamp."""
         logger.debug(f"Processing {len(names)} names")
         names_df = pd.DataFrame(names)
-        names_df = self._enrich_dataframe(names_df)
+        names_df = self._enrich_dataframe(names_df, timestamp)
         return names_df
 
-    def process_departments(self, departments):
+    def process_departments(self, departments, timestamp):
         """Process the departments data: unwrap tree structure, add ministry, and timestamp."""
         rows = self._unwrap_departments(departments)
         logger.debug(f"Processing {len(rows)} department rows")
         departments_df = pd.DataFrame(rows)
-        departments_df = self._enrich_dataframe(departments_df)
+        departments_df = self._enrich_dataframe(departments_df, timestamp)
         return departments_df
 
     def _unwrap_departments(self, departments):
@@ -43,14 +45,14 @@ class MinistryDataProcessor:
             rows.extend(utils.unwrap_tree(department))
         return rows
 
-    def _enrich_dataframe(self, df):
+    def _enrich_dataframe(self, df, timestamp):
         """Enrich DataFrame with ministry name and extraction timestamp."""
         df = utils.add_ministry(df, self.ministry_name)
-        df, timestamp = utils.add_timestamp(df)
-        return df, timestamp
+        df["_accessed_at"] = timestamp
+        return df
 
     def create_metadata(
-        self, names_df, departments_df, names_datetime, departments_datetime,
+        self, names_df, departments_df, timestamp,
         exploration_duration_seconds=None
     ):
         """Create metadata DataFrame."""
@@ -59,14 +61,14 @@ class MinistryDataProcessor:
                 "table_name": TABLE_NAMES,
                 "ministry_name": self.ministry_name,
                 "num_rows": len(names_df),
-                "_accessed_at": names_datetime,
+                "_accessed_at": timestamp,
                 "extraction_duration_seconds": exploration_duration_seconds,
             },
             {
                 "table_name": TABLE_DEPARTMENTS,
                 "ministry_name": self.ministry_name,
                 "num_rows": len(departments_df),
-                "_accessed_at": departments_datetime,
+                "_accessed_at": timestamp,
                 "extraction_duration_seconds": exploration_duration_seconds,
             },
         ]
@@ -98,10 +100,12 @@ class MinistryDataProcessor:
             tuple: (names_df, departments_df, metadata_df)
         """
         with LogContext(logger, "Processing data"):
-            names_df, names_datetime = self.process_names(names)
-            departments_df, departments_datetime = self.process_departments(departments)
+            timestamp = datetime.now()
+            logger.debug(f"Using extraction timestamp: {timestamp}")
+            names_df = self.process_names(names, timestamp)
+            departments_df = self.process_departments(departments, timestamp)
             metadata_df = self.create_metadata(
-                names_df, departments_df, names_datetime, departments_datetime,
+                names_df, departments_df, timestamp,
                 exploration_duration_seconds=exploration_duration
             )
         return names_df, departments_df, metadata_df
