@@ -1,15 +1,13 @@
-import argparse
 import os
 import sys
-from typing import Tuple
 
+from cli import parse_arguments
 from logger import get_logger, setup_logging, LogContext
 from ministries import ministries_url, organs_of_state_url
 from ministries.pipeline import MinistryDataProcessor
 from name_cleaning.pipeline import NameProcessorPipeline
 from preflight import check_requirements, GCP_TOKEN_PATH
 from slowly_changing_dimensions.pipeline import ConvertToSCD
-from validate_arguments import validate_ministry, validate_organs_of_state
 
 logger = get_logger(__name__)
 
@@ -17,96 +15,7 @@ ministry_names = list(ministries_url.keys())
 organs_of_states_names = list(organs_of_state_url.keys())
 
 
-def parse_arguments() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        description="Singapore Government Directory Extracter"
-    )
-
-    parser.add_argument(
-        "--ministry_extractor",
-        "-me",
-        action="store_true",
-        required=False,
-        help="Use this flag to run the ministry extractor",
-    )
-
-    parser.add_argument(
-        "--ministry",
-        "-m",
-        nargs="+",
-        type=validate_ministry,
-        required=False,
-        help="Key in full name of ministry to extract from. If blank, extracts from all ministries.",
-    )
-
-    parser.add_argument(
-        "--organs_of_state_extractor",
-        "-oose",
-        action="store_true",
-        required=False,
-        help="Use this flag to run the organs of state extractor",
-    )
-
-    parser.add_argument(
-        "--organs_of_state",
-        "-oos",
-        nargs="+",
-        type=validate_organs_of_state,
-        required=False,
-        help="Key in full name of organs of state to extract from. If blank, extracts from all organs of state.",
-    )
-
-    parser.add_argument(
-        "--resume_run",
-        "-rr",
-        action="store_true",
-        required=False,
-        help="Used when a run breaks and is to be continued",
-    )
-
-    parser.add_argument(
-        "--slowly_changing_dimensions",
-        "-scd",
-        action="store_true",
-        required=False,
-        help="Use this flag to run the slowly changing dimension convertor",
-    )
-
-    parser.add_argument(
-        "--name_cleaning",
-        "-nc",
-        action="store_true",
-        required=False,
-        help="Use this flag to run the name cleaner",
-    )
-
-    parser.add_argument(
-        "--check",
-        "-c",
-        action="store_true",
-        required=False,
-        help="Run pre-flight checks only (validate requirements without executing)",
-    )
-
-    parser.add_argument(
-        "--skip_checks",
-        action="store_true",
-        required=False,
-        help="Skip pre-flight checks and run directly",
-    )
-
-    parser.add_argument(
-        "--verbose",
-        "-v",
-        action="store_true",
-        required=False,
-        help="Enable verbose/debug logging output",
-    )
-
-    return parser.parse_args()
-
-
-def initialise_config(args: argparse.Namespace) -> Tuple[str, dict]:
+def initialise_config(args) -> tuple[str, dict]:
     config = {
         "run": {},
         "ministries": ministry_names if ministry_names else [],
