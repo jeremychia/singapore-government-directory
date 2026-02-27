@@ -6,3 +6,4 @@ logs/
 # Ignore Python bytecode files
 **/__pycache__/
 
+dbt/.user.yml

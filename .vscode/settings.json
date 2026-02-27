@@ -1,4 +1,7 @@
 {
   "python.defaultInterpreterPath": "${workspaceFolder}/extractor/.venv/bin/python",
-  "python.analysis.extraPaths": ["${workspaceFolder}/extractor"]
+"python.analysis.extraPaths": [
+    "${workspaceFolder}/extractor"
+],
+"python-envs.defaultEnvManager": "ms-python.python:system"
 }

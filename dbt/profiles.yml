@@ -5,9 +5,9 @@ singapore_government_directory:
       method: service-account
       project: singapore-government-directory
       keyfile: "../extractor/token/gcp_token.json"
-      dataset: prod
+      dataset: dbt
       threads: 4
       timeout_seconds: 300
-      location: US
+      location: EU
 
   target: dev
