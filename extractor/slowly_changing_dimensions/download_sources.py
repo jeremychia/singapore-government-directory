@@ -1,6 +1,9 @@
 import pandas as pd
 import pandas_gbq
 from gbq import PROJECT_ID
+from logger import get_logger
+
+logger = get_logger(__name__)
 
 
 class DownloadSources:
@@ -9,8 +12,10 @@ class DownloadSources:
 
         self.source_schema = "raw"
         self.target_schema = "scd"
+        logger.debug("Initialized DownloadSources")
 
     def download_names(self):
+        logger.debug("Downloading names from BigQuery")
         names_sql = f"""
         select
             md5(
@@ -39,10 +44,12 @@ class DownloadSources:
         current_names_df = pandas_gbq.read_gbq(
             query_or_table=names_sql, project_id=self.project_id
         )
+        logger.debug(f"Downloaded {len(current_names_df)} current name records")
 
         scd_names_df = pandas_gbq.read_gbq(
             query_or_table=f"{self.target_schema}.names", project_id=self.project_id
         )
+        logger.debug(f"Downloaded {len(scd_names_df)} existing SCD name records")
 
         concat_names = pd.concat([scd_names_df, current_names_df]).sort_values(
             by=["name_uuid", "_valid_from"], ascending=True
@@ -55,6 +62,7 @@ class DownloadSources:
         return concat_names, last_download__names
 
     def download_departments(self):
+        logger.debug("Downloading departments from BigQuery")
         departments_sql = f"""
         select
             md5(
@@ -81,11 +89,13 @@ class DownloadSources:
         current_departments_df = pandas_gbq.read_gbq(
             query_or_table=departments_sql, project_id=self.project_id
         )
+        logger.debug(f"Downloaded {len(current_departments_df)} current department records")
 
         scd_departments_df = pandas_gbq.read_gbq(
             query_or_table=f"{self.target_schema}.departments",
             project_id=self.project_id,
         )
+        logger.debug(f"Downloaded {len(scd_departments_df)} existing SCD department records")
 
         concat_departments = pd.concat(
             [scd_departments_df, current_departments_df]
@@ -98,11 +108,13 @@ class DownloadSources:
         return concat_departments, last_download__departments
 
     def run(self):
+        logger.info("Downloading all source data")
         concat_names, last_download__names = self.download_names()
         (
             concat_departments,
             last_download__departments,
         ) = self.download_departments()
+        logger.info("Source data download complete")
 
         return (
             concat_names,

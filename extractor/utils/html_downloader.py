@@ -1,4 +1,7 @@
 import requests
+from logger import get_logger
+
+logger = get_logger(__name__)
 
 
 class HTMLDownloader:
@@ -7,14 +10,22 @@ class HTMLDownloader:
 
     def download_html(self):
         try:
-            response = requests.get(self.url)
+            logger.debug(f"Downloading: {self.url}")
+            response = requests.get(self.url, timeout=30)
             if response.status_code == 200:
+                logger.debug(f"Successfully downloaded {len(response.content)} bytes")
                 return response.content
             else:
-                print(
-                    "Failed to retrieve the webpage. Status code:", response.status_code
+                logger.error(
+                    f"Failed to retrieve webpage. Status code: {response.status_code}, URL: {self.url}"
                 )
                 return None
+        except requests.exceptions.Timeout:
+            logger.error(f"Timeout while downloading: {self.url}")
+            return None
+        except requests.exceptions.ConnectionError as e:
+            logger.error(f"Connection error for {self.url}: {e}")
+            return None
         except requests.exceptions.RequestException as e:
-            print("An error occurred:", e)
+            logger.error(f"Request error for {self.url}: {e}")
             return None

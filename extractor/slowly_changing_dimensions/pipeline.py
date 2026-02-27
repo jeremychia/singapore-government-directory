@@ -1,7 +1,10 @@
 import numpy as np
 import pandas as pd
 from gbq import PROJECT_ID, save_to_bigquery
+from logger import get_logger, LogContext
 from slowly_changing_dimensions.download_sources import DownloadSources
+
+logger = get_logger(__name__)
 
 
 class ConvertToSCD:
@@ -9,30 +12,38 @@ class ConvertToSCD:
         self.download_sources = DownloadSources()
         self.project_id = PROJECT_ID
         self.target_schema = "scd"
+        logger.debug("Initialized ConvertToSCD processor")
 
     def process_and_upload(self):
         """Processes names and departments, then uploads to BigQuery."""
-
-        (
-            concat_names,
-            last_download__names,
-            concat_departments,
-            last_download__departments,
-        ) = self.download_sources.run()
+        
+        with LogContext(logger, "Downloading source data"):
+            (
+                concat_names,
+                last_download__names,
+                concat_departments,
+                last_download__departments,
+            ) = self.download_sources.run()
+        
+        logger.info(f"Downloaded {len(concat_names)} name records and {len(concat_departments)} department records")
 
         # Process names
-        name_processor = NameProcessor(concat_names, last_download__names)
-        new_scd_names = name_processor.process_concat_names()
-        save_to_bigquery(new_scd_names, self.project_id, self.target_schema, "names")
+        with LogContext(logger, "Processing names SCD"):
+            name_processor = NameProcessor(concat_names, last_download__names)
+            new_scd_names = name_processor.process_concat_names()
+            logger.info(f"Processed {len(new_scd_names)} SCD name records")
+            save_to_bigquery(new_scd_names, self.project_id, self.target_schema, "names")
 
         # Process departments
-        department_processor = DepartmentProcessor(
-            concat_departments, last_download__departments
-        )
-        new_scd_departments = department_processor.process_concat_departments()
-        save_to_bigquery(
-            new_scd_departments, self.project_id, self.target_schema, "departments"
-        )
+        with LogContext(logger, "Processing departments SCD"):
+            department_processor = DepartmentProcessor(
+                concat_departments, last_download__departments
+            )
+            new_scd_departments = department_processor.process_concat_departments()
+            logger.info(f"Processed {len(new_scd_departments)} SCD department records")
+            save_to_bigquery(
+                new_scd_departments, self.project_id, self.target_schema, "departments"
+            )
 
 
 class NameProcessor:
