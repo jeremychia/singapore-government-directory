@@ -54,22 +54,24 @@ class MinistryDataProcessor:
         exploration_duration_seconds=None
     ):
         """Create metadata DataFrame."""
-        table_name = [TABLE_NAMES, TABLE_DEPARTMENTS]
-        ministry_name = [self.ministry_name] * len(table_name)
-        num_rows = [len(names_df), len(departments_df)]
-        accessed_at = [names_datetime, departments_datetime]
-        duration_seconds = [exploration_duration_seconds, exploration_duration_seconds]
-
-        metadata_df = pd.DataFrame(
+        metadata_rows = [
             {
-                "table_name": table_name,
-                "ministry_name": ministry_name,
-                "num_rows": num_rows,
-                "_accessed_at": accessed_at,
-                "extraction_duration_seconds": duration_seconds,
-            }
-        )
-        logger.debug(f"Created metadata: names={num_rows[0]}, departments={num_rows[1]}, duration={exploration_duration_seconds}s")
+                "table_name": TABLE_NAMES,
+                "ministry_name": self.ministry_name,
+                "num_rows": len(names_df),
+                "_accessed_at": names_datetime,
+                "extraction_duration_seconds": exploration_duration_seconds,
+            },
+            {
+                "table_name": TABLE_DEPARTMENTS,
+                "ministry_name": self.ministry_name,
+                "num_rows": len(departments_df),
+                "_accessed_at": departments_datetime,
+                "extraction_duration_seconds": exploration_duration_seconds,
+            },
+        ]
+        metadata_df = pd.DataFrame(metadata_rows)
+        logger.debug(f"Created metadata: names={len(names_df)}, departments={len(departments_df)}, duration={exploration_duration_seconds}s")
         return metadata_df
 
     def process_and_upload(self):
