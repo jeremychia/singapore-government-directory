@@ -30,7 +30,7 @@ class MinistryDataProcessor:
         """Process the names data: add ministry and timestamp."""
         logger.debug(f"Processing {len(names)} names")
         names_df = pd.DataFrame(names)
-        names_df = self._add_ministry_and_timestamp(names_df)
+        names_df = self._enrich_dataframe(names_df)
         return names_df
 
     def process_departments(self, departments):
@@ -38,7 +38,7 @@ class MinistryDataProcessor:
         rows = self._unwrap_departments(departments)
         logger.debug(f"Processing {len(rows)} department rows")
         departments_df = pd.DataFrame(rows)
-        departments_df = self._add_ministry_and_timestamp(departments_df)
+        departments_df = self._enrich_dataframe(departments_df)
         return departments_df
 
     def _unwrap_departments(self, departments):
@@ -48,8 +48,8 @@ class MinistryDataProcessor:
             rows.extend(utils.unwrap_tree(department))
         return rows
 
-    def _add_ministry_and_timestamp(self, df):
-        """Add ministry and timestamp to a DataFrame."""
+    def _enrich_dataframe(self, df):
+        """Enrich DataFrame with ministry name and extraction timestamp."""
         df = utils.add_ministry(df, self.ministry_name)
         df, timestamp = utils.add_timestamp(df)
         return df, timestamp
