@@ -174,11 +174,16 @@ with
             lower(n.clean_name) as name_lower,
             case
                 -- 1. Malay: check for bin/binti patterns first (most distinctive)
+                -- Use word boundaries to avoid matching 'bin' inside 'Bing'
                 when exists (
                     select 1 from ethnicity_patterns p
                     where p.ethnicity = 'Malay'
                     and p.pattern_type = 'pattern'
-                    and lower(n.clean_name) like '%' || lower(p.pattern) || '%'
+                    and (
+                        lower(n.clean_name) like '% ' || lower(p.pattern) || ' %'  -- middle of name
+                        or lower(n.clean_name) like lower(p.pattern) || ' %'  -- start of name
+                        or lower(n.clean_name) like '% ' || lower(p.pattern)  -- end of name
+                    )
                 ) then 'Malay'
                 
                 -- 2. Malay: check for name_start patterns (must be followed by space)
