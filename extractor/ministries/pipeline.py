@@ -21,11 +21,6 @@ class MinistryDataProcessor:
         self.explorer = MinistryExplorer(ministry_name, url)
         logger.debug(f"Initialized MinistryDataProcessor for {ministry_name}")
 
-    def explore_ministries(self):
-        """Explore the ministries and return names and departments."""
-        logger.debug(f"Exploring ministries for {self.ministry_name}")
-        return self.explorer.explore_ministries()
-
     def process_names(self, names):
         """Process the names data: add ministry and timestamp."""
         logger.debug(f"Processing {len(names)} names")
@@ -80,7 +75,7 @@ class MinistryDataProcessor:
     def process_and_upload(self):
         """Main function to process and upload names, departments, and metadata."""
         with LogContext(logger, "Exploring ministry structure", ministry=self.ministry_name):
-            names, departments = self.explore_ministries()
+            names, departments = self.explorer.explore_ministries()
         
         # Get exploration duration from the explorer
         exploration_duration = self.explorer.get_exploration_duration()
