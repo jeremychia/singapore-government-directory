@@ -6,6 +6,11 @@ from ministries.ministry_explorer import MinistryExplorer
 
 logger = get_logger(__name__)
 
+# Table name constants
+TABLE_NAMES = "names"
+TABLE_DEPARTMENTS = "departments"
+TABLE_METADATA = "metadata"
+
 
 class MinistryDataProcessor:
     def __init__(self, ministry_name, url):
@@ -54,7 +59,7 @@ class MinistryDataProcessor:
         exploration_duration_seconds=None
     ):
         """Create metadata DataFrame."""
-        table_name = ["names", "departments"]
+        table_name = [TABLE_NAMES, TABLE_DEPARTMENTS]
         ministry_name = [self.ministry_name] * len(table_name)
         num_rows = [len(names_df), len(departments_df)]
         accessed_at = [names_datetime, departments_datetime]
@@ -91,13 +96,13 @@ class MinistryDataProcessor:
             )
 
         with LogContext(logger, "Uploading to BigQuery"):
-            logger.info(f"Uploading {len(names_df)} names to {self.schema}.names")
-            append_in_bigquery(names_df, self.project_id, self.schema, "names")
+            logger.info(f"Uploading {len(names_df)} names to {self.schema}.{TABLE_NAMES}")
+            append_in_bigquery(names_df, self.project_id, self.schema, TABLE_NAMES)
             
-            logger.info(f"Uploading {len(departments_df)} departments to {self.schema}.departments")
-            append_in_bigquery(departments_df, self.project_id, self.schema, "departments")
+            logger.info(f"Uploading {len(departments_df)} departments to {self.schema}.{TABLE_DEPARTMENTS}")
+            append_in_bigquery(departments_df, self.project_id, self.schema, TABLE_DEPARTMENTS)
             
             logger.info("Uploading metadata")
-            append_in_bigquery(metadata_df, self.project_id, self.schema, "metadata")
+            append_in_bigquery(metadata_df, self.project_id, self.schema, TABLE_METADATA)
         
         logger.info(f"Successfully processed {self.ministry_name}")
