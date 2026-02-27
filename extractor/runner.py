@@ -19,18 +19,46 @@ def _run_extraction(name: str, url: str, context_name: str, **context_kwargs) ->
         pipeline.process_and_upload()
 
 
+def _run_extractions(
+    items_to_run: list[str],
+    url_map: dict[str, str],
+    context_name: str,
+    context_key: str,
+) -> None:
+    """Run extraction for multiple entities.
+    
+    Args:
+        items_to_run: List of entity names to extract
+        url_map: Mapping of entity names to URLs
+        context_name: Name for log context (e.g., "Ministry extraction")
+        context_key: Key for context kwargs (e.g., "ministry" or "organ")
+    """
+    for name in items_to_run:
+        url = url_map.get(name)
+        if url:
+            _run_extraction(name, url, context_name, **{context_key: name})
+        else:
+            logger.warning(f"No URL found for: {name}")
+
+
 def run_ministry_extraction(config: Config) -> None:
     """Run extraction for all configured ministries."""
-    for ministry_name, url in ministries_url.items():
-        if ministry_name in config.ministries:
-            _run_extraction(ministry_name, url, "Ministry extraction", ministry=ministry_name)
+    _run_extractions(
+        config.ministries,
+        ministries_url,
+        "Ministry extraction",
+        "ministry",
+    )
 
 
 def run_organs_of_state_extraction(config: Config) -> None:
     """Run extraction for all configured organs of state."""
-    for organ_name, url in organs_of_state_url.items():
-        if organ_name in config.organs_of_state:
-            _run_extraction(organ_name, url, "Organ of State extraction", organ=organ_name)
+    _run_extractions(
+        config.organs_of_state,
+        organs_of_state_url,
+        "Organ of State extraction",
+        "organ",
+    )
 
 
 def run_scd_processing() -> None:
