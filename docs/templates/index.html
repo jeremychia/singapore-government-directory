@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Singapore Government Directory - Analytics</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            /* Lighter Pantone-inspired colors */
+            --pantone-red: #E07A7A;
+            --pantone-blue: #6B9DC9;
+            --pantone-pink: #F2A0B5;
+            --pantone-green: #7DD3B8;
+            --pantone-orange: #F9B97A;
+            --pantone-purple: #A89FC9;
+            --pantone-gray: #C4C4C4;
+            --pantone-navy: #1D3461;
+            
+            --bg: #fafafa;
+            --card-bg: #ffffff;
+            --text: #1a1a1a;
+            --text-muted: #666666;
+            --border: #e0e0e0;
+            --success: #7DD3B8;
+            --warning: #F9B97A;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        
+        header {
+            background: var(--pantone-red);
+            color: white;
+            padding: 2.5rem 2rem;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.5px;
+        }
+        
+        header p {
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .section {
+            margin-bottom: 3rem;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--pantone-navy);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0;
+        }
+        
+        .toggle-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .toggle-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+        
+        .toggle-btn:hover {
+            background: #f0f0f0;
+        }
+        
+        .toggle-btn.active {
+            background: var(--pantone-navy);
+            color: white;
+            border-color: var(--pantone-navy);
+        }
+        
+        .grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+        
+        .grid-2 {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .grid-3 {
+            grid-template-columns: repeat(3, 1fr);
+        }
+        
+        .grid-1-2 {
+            grid-template-columns: 1fr 2fr;
+        }
+        
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            padding: 1.5rem;
+        }
+        
+        .card-header {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 1rem;
+        }
+        
+        .stat-large {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--pantone-red);
+            line-height: 1.2;
+        }
+        
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 80px;
+        }
+        
+        .chart-container-ministry {
+            position: relative;
+            min-height: 550px;
+        }
+        
+        .chart-container-organs {
+            position: relative;
+            min-height: 350px;
+        }
+        
+        .progress-container {
+            margin: 1rem 0;
+        }
+        
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .progress-label-name {
+            color: var(--text);
+            font-weight: 500;
+        }
+        
+        .progress-label-value {
+            color: var(--text-muted);
+        }
+        
+        .progress-bar {
+            height: 10px;
+            background: var(--border);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            border-radius: 5px;
+            transition: width 0.5s ease;
+        }
+        
+        .progress-fill.high {
+            background: var(--success);
+        }
+        
+        .progress-fill.medium {
+            background: var(--warning);
+        }
+        
+        .progress-fill.low {
+            background: var(--pantone-red);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        
+        th, td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        th {
+            font-weight: 600;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        tbody tr:hover {
+            background: #f5f5f5;
+        }
+        
+        .number {
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+            font-weight: 500;
+        }
+        
+        .legend-inline {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+        
+        .legend-color {
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+        }
+        
+        .table-scroll {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            border-top: 1px solid var(--border);
+            margin-top: 2rem;
+        }
+        
+        footer p {
+            margin: 0.25rem 0;
+        }
+        
+        @media (max-width: 1024px) {
+            .grid-2, .grid-3, .grid-1-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            header {
+                padding: 1.5rem 1rem;
+            }
+            
+            header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .stat-large {
+                font-size: 2.5rem;
+            }
+            
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🇸🇬 Singapore Government Directory</h1>
+        <p>Demographics & Data Quality Analytics</p>
+    </header>
+
+    <div class="container">
+        <!-- Overview Section -->
+        <div class="section">
+            <h2 class="section-title">📊 Overview</h2>
+            <div class="grid grid-3" style="margin-top: 1.5rem;">
+                <div class="card">
+                    <div class="card-header">Total Personnel</div>
+                    <div class="stat-large">{{ "{:,}".format(data_quality.total_persons) }}</div>
+                    <div class="stat-label">Unique individuals in directory</div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">Gender Composition</div>
+                    <div class="chart-container">
+                        <canvas id="genderBarChart"></canvas>
+                    </div>
+                    <div class="legend-inline" id="genderLegend"></div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">Ethnic Composition</div>
+                    <div class="chart-container">
+                        <canvas id="ethnicityBarChart"></canvas>
+                    </div>
+                    <div class="legend-inline" id="ethnicityLegend"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ministries Section -->
+        <div class="section">
+            <div class="section-header">
+                <h2 class="section-title">🏛️ Ministries</h2>
+                <div class="toggle-group">
+                    <button class="toggle-btn active" data-mode="percent" data-target="ministry">Percentage</button>
+                    <button class="toggle-btn" data-mode="absolute" data-target="ministry">Absolute</button>
+                </div>
+            </div>
+            <div class="grid grid-2">
+                <div class="card">
+                    <div class="card-header">Gender by Ministry</div>
+                    <div class="chart-container-ministry">
+                        <canvas id="genderByMinistryChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">Ethnicity by Ministry</div>
+                    <div class="chart-container-ministry">
+                        <canvas id="ethnicityByMinistryChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Organs of State Section -->
+        <div class="section">
+            <div class="section-header">
+                <h2 class="section-title">⚖️ Organs of State</h2>
+                <div class="toggle-group">
+                    <button class="toggle-btn active" data-mode="percent" data-target="organs">Percentage</button>
+                    <button class="toggle-btn" data-mode="absolute" data-target="organs">Absolute</button>
+                </div>
+            </div>
+            <div class="grid grid-2">
+                <div class="card">
+                    <div class="card-header">Gender by Organ of State</div>
+                    <div class="chart-container-organs">
+                        <canvas id="genderByOrgansChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">Ethnicity by Organ of State</div>
+                    <div class="chart-container-organs">
+                        <canvas id="ethnicityByOrgansChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Quality Section -->
+        <div class="section">
+            <h2 class="section-title">✅ Data Quality</h2>
+            <div class="grid grid-1-2" style="margin-top: 1.5rem;">
+                <div class="card">
+                    <div class="card-header">Field Completeness</div>
+                    {% for metric in data_quality.metrics %}
+                    <div class="progress-container">
+                        <div class="progress-label">
+                            <span class="progress-label-name">{{ metric.name }}</span>
+                            <span class="progress-label-value">{{ "{:,}".format(metric.count) }} ({{ metric.pct }}%)</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill {% if metric.pct >= 80 %}high{% elif metric.pct >= 50 %}medium{% else %}low{% endif %}" style="width: {{ metric.pct }}%"></div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">Headcount Summary</div>
+                    <div class="grid grid-2">
+                        <div>
+                            <h4 style="margin-bottom: 0.5rem; color: var(--pantone-navy);">Ministries</h4>
+                            <div class="table-scroll">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Ministry</th>
+                                            <th class="number">Count</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for row in ministry_headcount %}
+                                        <tr>
+                                            <td>{{ row.ministry_name }}</td>
+                                            <td class="number">{{ "{:,}".format(row.headcount) }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 style="margin-bottom: 0.5rem; color: var(--pantone-navy);">Organs of State</h4>
+                            <div class="table-scroll">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Organ</th>
+                                            <th class="number">Count</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for row in organs_headcount %}
+                                        <tr>
+                                            <td>{{ row.ministry_name }}</td>
+                                            <td class="number">{{ "{:,}".format(row.headcount) }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>Generated: {{ generated_at }}</p>
+        <p>Data source: Singapore Government Directory</p>
+        <p><em>Note: Gender and ethnicity are predicted based on name analysis and may not be fully accurate.</em></p>
+    </footer>
+
+    <script>
+        // Lighter Pantone-inspired color palettes
+        const genderColors = {
+            'M': '#6B9DC9',          // Light Pantone Blue
+            'F': '#F2A0B5',          // Light Pantone Pink
+            'Male': '#6B9DC9',       // Light Pantone Blue
+            'Female': '#F2A0B5',     // Light Pantone Pink
+            'Unknown': '#C4C4C4'     // Light Pantone Gray
+        };
+        
+        const ethnicityColors = {
+            'Chinese': '#E07A7A',    // Light Pantone Red
+            'Malay': '#7DD3B8',      // Light Pantone Green
+            'Indian': '#F9B97A',     // Light Pantone Orange
+            'Other': '#A89FC9',      // Light Pantone Purple
+            'Others': '#A89FC9',     // Light Pantone Purple
+            'Unknown': '#C4C4C4'     // Light Pantone Gray
+        };
+        
+        // Gender labels mapping
+        const genderLabels = {
+            'M': 'Male',
+            'F': 'Female',
+            'Male': 'Male',
+            'Female': 'Female',
+            'Unknown': 'Unknown'
+        };
+        
+        // Store chart instances and data for toggling
+        const chartInstances = {};
+        const chartData = {};
+        
+        // Helper to create inline legend
+        function createLegend(containerId, data, colorMap, labelKey, labelMap = null) {
+            const container = document.getElementById(containerId);
+            const total = data.reduce((sum, d) => sum + d.count, 0);
+            
+            data.forEach(d => {
+                const rawLabel = d[labelKey];
+                const displayLabel = labelMap ? (labelMap[rawLabel] || rawLabel) : rawLabel;
+                const pct = ((d.count / total) * 100).toFixed(1);
+                const item = document.createElement('div');
+                item.className = 'legend-item';
+                item.innerHTML = `
+                    <span class="legend-color" style="background: ${colorMap[rawLabel] || '#9B9B9B'}"></span>
+                    <span>${displayLabel}: ${pct}%</span>
+                `;
+                container.appendChild(item);
+            });
+        }
+        
+        // Helper to create stacked bar chart with mode support
+        function createStackedBarChart(canvasId, pivotData, colorMap, labelMap = null, mode = 'percent') {
+            if (!pivotData.ministries || pivotData.ministries.length === 0) {
+                document.getElementById(canvasId).parentElement.innerHTML = '<p style="color: #666; text-align: center; padding: 2rem;">No data available</p>';
+                return null;
+            }
+            
+            const ministryTotals = pivotData.ministries.map((_, i) => 
+                pivotData.categories.reduce((sum, cat) => sum + (pivotData.data[cat]?.[i] || 0), 0)
+            );
+            
+            const isPercent = mode === 'percent';
+            
+            const chart = new Chart(document.getElementById(canvasId), {
+                type: 'bar',
+                data: {
+                    labels: pivotData.ministries,
+                    datasets: pivotData.categories.map(cat => ({
+                        label: labelMap ? (labelMap[cat] || cat) : cat,
+                        data: isPercent 
+                            ? (pivotData.data[cat] || []).map((val, i) => 
+                                ministryTotals[i] > 0 ? (val / ministryTotals[i]) * 100 : 0)
+                            : (pivotData.data[cat] || []),
+                        backgroundColor: colorMap[cat] || '#9B9B9B'
+                    }))
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    scales: {
+                        x: {
+                            stacked: true,
+                            max: isPercent ? 100 : undefined,
+                            ticks: {
+                                callback: (val) => isPercent ? val + '%' : val.toLocaleString()
+                            }
+                        },
+                        y: {
+                            stacked: true,
+                            ticks: {
+                                font: { size: 11 },
+                                autoSkip: false,
+                                maxRotation: 0
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { 
+                            position: 'top',
+                            labels: { 
+                                boxWidth: 12,
+                                padding: 15
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => isPercent 
+                                    ? `${ctx.dataset.label}: ${ctx.raw.toFixed(1)}%`
+                                    : `${ctx.dataset.label}: ${ctx.raw.toLocaleString()}`
+                            }
+                        }
+                    }
+                }
+            });
+            
+            return chart;
+        }
+        
+        // Function to update charts based on mode
+        function updateCharts(target, mode) {
+            const chartsToUpdate = target === 'ministry' 
+                ? ['genderByMinistryChart', 'ethnicityByMinistryChart']
+                : ['genderByOrgansChart', 'ethnicityByOrgansChart'];
+            
+            chartsToUpdate.forEach(chartId => {
+                if (chartInstances[chartId]) {
+                    chartInstances[chartId].destroy();
+                }
+                
+                const { pivotData, colorMap, labelMap } = chartData[chartId];
+                chartInstances[chartId] = createStackedBarChart(chartId, pivotData, colorMap, labelMap, mode);
+            });
+        }
+        
+        // Gender Stacked Bar Chart (overview)
+        const genderDataOverview = {{ gender_distribution | tojson }};
+        const genderTotal = genderDataOverview.reduce((sum, d) => sum + d.count, 0);
+        
+        new Chart(document.getElementById('genderBarChart'), {
+            type: 'bar',
+            data: {
+                labels: [''],
+                datasets: genderDataOverview.map(d => ({
+                    label: genderLabels[d.gender] || d.gender,
+                    data: [(d.count / genderTotal) * 100],
+                    backgroundColor: genderColors[d.gender] || '#9B9B9B',
+                    borderRadius: 4,
+                }))
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                scales: {
+                    x: { stacked: true, max: 100, display: false },
+                    y: { stacked: true, display: false }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => `${ctx.dataset.label}: ${ctx.raw.toFixed(1)}%`
+                        }
+                    }
+                }
+            }
+        });
+        createLegend('genderLegend', genderDataOverview, genderColors, 'gender', genderLabels);
+        
+        // Ethnicity Stacked Bar Chart (overview)
+        const ethnicityDataOverview = {{ ethnicity_distribution | tojson }};
+        const ethnicityTotal = ethnicityDataOverview.reduce((sum, d) => sum + d.count, 0);
+        
+        new Chart(document.getElementById('ethnicityBarChart'), {
+            type: 'bar',
+            data: {
+                labels: [''],
+                datasets: ethnicityDataOverview.map(d => ({
+                    label: d.ethnicity,
+                    data: [(d.count / ethnicityTotal) * 100],
+                    backgroundColor: ethnicityColors[d.ethnicity] || '#9B9B9B',
+                    borderRadius: 4,
+                }))
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                scales: {
+                    x: { stacked: true, max: 100, display: false },
+                    y: { stacked: true, display: false }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => `${ctx.dataset.label}: ${ctx.raw.toFixed(1)}%`
+                        }
+                    }
+                }
+            }
+        });
+        createLegend('ethnicityLegend', ethnicityDataOverview, ethnicityColors, 'ethnicity');
+        
+        // Ministry and Organs data
+        const genderByMinistry = {{ gender_by_ministry | safe }};
+        const ethnicityByMinistry = {{ ethnicity_by_ministry | safe }};
+        const genderByOrgans = {{ gender_by_organs | safe }};
+        const ethnicityByOrgans = {{ ethnicity_by_organs | safe }};
+        
+        // Store chart data for toggle functionality
+        chartData['genderByMinistryChart'] = { pivotData: genderByMinistry, colorMap: genderColors, labelMap: genderLabels };
+        chartData['ethnicityByMinistryChart'] = { pivotData: ethnicityByMinistry, colorMap: ethnicityColors, labelMap: null };
+        chartData['genderByOrgansChart'] = { pivotData: genderByOrgans, colorMap: genderColors, labelMap: genderLabels };
+        chartData['ethnicityByOrgansChart'] = { pivotData: ethnicityByOrgans, colorMap: ethnicityColors, labelMap: null };
+        
+        // Initialize all charts in percent mode
+        chartInstances['genderByMinistryChart'] = createStackedBarChart('genderByMinistryChart', genderByMinistry, genderColors, genderLabels, 'percent');
+        chartInstances['ethnicityByMinistryChart'] = createStackedBarChart('ethnicityByMinistryChart', ethnicityByMinistry, ethnicityColors, null, 'percent');
+        chartInstances['genderByOrgansChart'] = createStackedBarChart('genderByOrgansChart', genderByOrgans, genderColors, genderLabels, 'percent');
+        chartInstances['ethnicityByOrgansChart'] = createStackedBarChart('ethnicityByOrgansChart', ethnicityByOrgans, ethnicityColors, null, 'percent');
+        
+        // Toggle button event listeners
+        document.querySelectorAll('.toggle-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const mode = this.dataset.mode;
+                const target = this.dataset.target;
+                
+                // Update button states
+                this.parentElement.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Update charts
+                updateCharts(target, mode);
+            });
+        });
+    </script>
+</body>
+</html>

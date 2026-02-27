@@ -2,6 +2,8 @@ token/
 **/token/
 logs/
 
+# Generated docs
+docs/dist/
 
 # Ignore Python bytecode files
 **/__pycache__/
