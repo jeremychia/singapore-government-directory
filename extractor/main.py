@@ -3,12 +3,10 @@ import sys
 
 from cli import parse_arguments
 from config import Config, RunConfig
-from logger import get_logger, setup_logging, LogContext
+from logger import get_logger, setup_logging
 from ministries import ministries_url, organs_of_state_url
-from ministries.pipeline import MinistryDataProcessor
-from name_cleaning.pipeline import NameProcessorPipeline
 from preflight import check_requirements, GCP_TOKEN_PATH
-from slowly_changing_dimensions.pipeline import ConvertToSCD
+from runner import run_all
 
 logger = get_logger(__name__)
 
@@ -126,39 +124,7 @@ def main():
             print("Use --skip_checks to bypass this check (not recommended).")
             sys.exit(1)
 
-    if config.run.ministry_extractor:
-        for ministry_name, url in ministries_url.items():
-            if ministry_name not in config.ministries:
-                continue
-            else:
-                logger.info(f"Starting extraction for: {ministry_name}")
-                logger.debug(f"URL: {url}")
-                with LogContext(logger, "Ministry extraction", ministry=ministry_name):
-                    pipeline = MinistryDataProcessor(ministry_name, url)
-                    pipeline.process_and_upload()
-
-    if config.run.organs_of_state_extractor:
-        for organ_of_state_name, url in organs_of_state_url.items():
-            if organ_of_state_name not in config.organs_of_state:
-                continue
-            else:
-                logger.info(f"Starting extraction for: {organ_of_state_name}")
-                logger.debug(f"URL: {url}")
-                with LogContext(logger, "Organ of State extraction", organ=organ_of_state_name):
-                    pipeline = MinistryDataProcessor(organ_of_state_name, url)
-                    pipeline.process_and_upload()
-
-    if config.run.slowly_changing_dimensions:
-        with LogContext(logger, "SCD processing"):
-            convert_scd = ConvertToSCD()
-            convert_scd.process_and_upload()
-
-    if config.run.name_cleaning:
-        with LogContext(logger, "Name cleaning"):
-            cleaning = NameProcessorPipeline()
-            cleaning.run()
-
-    logger.info("All operations completed successfully")
+    run_all(config)
 
 
 if __name__ == "__main__":
