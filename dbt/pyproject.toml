@@ -1,19 +1,13 @@
+[project]
+name = "singapore-government-directory-dbt"
+version = "0.1.0"
+description = "dbt project for Singapore Government Directory"
+readme = "README.md"
+requires-python = ">=3.10,<3.13"
+dependencies = [
+    "dbt-core>=1.9.1",
+    "dbt-bigquery>=1.9.1",
+]
+
 [tool.sqlfmt]
 dialect = "polyglot"
-
-[tool.poetry]
-name = "singapore-government-directory"
-version = "0.1.0"
-description = ""
-authors = ["jeremychia <jeremyjchia@gmail.com>"]
-readme = "README.md"
-package-mode = false
-
-[tool.poetry.dependencies]
-python = "^3.10"
-dbt-core = "^1.9.1"
-dbt-bigquery = "^1.9.1"
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"

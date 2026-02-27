@@ -1,0 +1,13 @@
+singapore_government_directory:
+  outputs:
+    dev:
+      type: bigquery
+      method: service-account
+      project: singapore-government-directory
+      keyfile: "../extractor/token/gcp_token.json"
+      dataset: prod
+      threads: 4
+      timeout_seconds: 300
+      location: US
+
+  target: dev
