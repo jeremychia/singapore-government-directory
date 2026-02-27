@@ -74,16 +74,29 @@ class MinistryDataProcessor:
         logger.debug(f"Created metadata: names={len(names_df)}, departments={len(departments_df)}, duration={exploration_duration_seconds}s")
         return metadata_df
 
-    def process_and_upload(self):
-        """Main function to process and upload names, departments, and metadata."""
+    def explore(self):
+        """Explore ministry structure and return raw data.
+        
+        Returns:
+            tuple: (names, departments, exploration_duration)
+        """
         with LogContext(logger, "Exploring ministry structure", ministry=self.ministry_name):
             names, departments = self.explorer.explore_ministries()
-        
-        # Get exploration duration from the explorer
         exploration_duration = self.explorer.get_exploration_duration()
-        
         logger.info(f"Found {len(names)} names and {len(departments)} departments")
+        return names, departments, exploration_duration
 
+    def process(self, names, departments, exploration_duration):
+        """Process raw data into DataFrames.
+        
+        Args:
+            names: Raw names data from exploration
+            departments: Raw departments data from exploration
+            exploration_duration: Duration of exploration in seconds
+            
+        Returns:
+            tuple: (names_df, departments_df, metadata_df)
+        """
         with LogContext(logger, "Processing data"):
             names_df, names_datetime = self.process_names(names)
             departments_df, departments_datetime = self.process_departments(departments)
@@ -91,7 +104,16 @@ class MinistryDataProcessor:
                 names_df, departments_df, names_datetime, departments_datetime,
                 exploration_duration_seconds=exploration_duration
             )
+        return names_df, departments_df, metadata_df
 
+    def upload(self, names_df, departments_df, metadata_df):
+        """Upload DataFrames to BigQuery.
+        
+        Args:
+            names_df: Processed names DataFrame
+            departments_df: Processed departments DataFrame
+            metadata_df: Metadata DataFrame
+        """
         with LogContext(logger, "Uploading to BigQuery"):
             logger.info(f"Uploading {len(names_df)} names to {self.schema}.{TABLE_NAMES}")
             append_in_bigquery(names_df, self.project_id, self.schema, TABLE_NAMES)
@@ -101,5 +123,10 @@ class MinistryDataProcessor:
             
             logger.info("Uploading metadata")
             append_in_bigquery(metadata_df, self.project_id, self.schema, TABLE_METADATA)
-        
+
+    def process_and_upload(self):
+        """Main function to process and upload names, departments, and metadata."""
+        names, departments, exploration_duration = self.explore()
+        names_df, departments_df, metadata_df = self.process(names, departments, exploration_duration)
+        self.upload(names_df, departments_df, metadata_df)
         logger.info(f"Successfully processed {self.ministry_name}")
