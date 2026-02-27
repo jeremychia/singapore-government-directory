@@ -76,6 +76,64 @@ with
         where is_latest = true
     ),
 
+    -- scan all prefix history for gendered prefixes (fallback when current prefix is gender-neutral)
+    -- e.g. "Ms Jane DOE" → "Dr Jane DOE" still yields F from historical prefix
+    historical_gender_from_prefix as (
+        select
+            extracted_name as canonical_name,
+            case
+                when lower(replace(prefix, '.', ''))
+                    in ('mr', 'sir', 'lord')
+                then 'M'
+                when lower(replace(prefix, '.', ''))
+                    in ('ms', 'mdm', 'miss', 'mrs', 'assoc prof (ms)', 'dame', 'lady')
+                then 'F'
+                else null
+            end as gender_from_prefix
+        from {{ ref("stg_preprocessed_prefixes_history") }}
+        where case
+                when lower(replace(prefix, '.', ''))
+                    in ('mr', 'sir', 'lord')
+                then 'M'
+                when lower(replace(prefix, '.', ''))
+                    in ('ms', 'mdm', 'miss', 'mrs', 'assoc prof (ms)', 'dame', 'lady')
+                then 'F'
+                else null
+            end is not null
+        qualify row_number() over (
+            partition by extracted_name
+            order by effective_to desc
+        ) = 1
+    ),
+
+    -- extract gender from patronymic patterns in the canonical name
+    -- Malay: bin/b. = male, binti/bt./bte/binte = female
+    -- Indian: s/o/a/l = male, d/o/a/p = female
+    patronymic_gender as (
+        select
+            canonical_name,
+            case
+                when regexp_contains(
+                    lower(canonical_name),
+                    r'(?:^|\s)(?:bin|b\.)(?:\s|$)'
+                ) then 'M'
+                when regexp_contains(
+                    lower(canonical_name),
+                    r'(?:^|\s)(?:binti|bt\.|bte|binte)(?:\s|$)'
+                ) then 'F'
+                when regexp_contains(
+                    lower(canonical_name),
+                    r'(?:^|\s)(?:s/o|a/l)(?:\s|$)'
+                ) then 'M'
+                when regexp_contains(
+                    lower(canonical_name),
+                    r'(?:^|\s)(?:d/o|a/p)(?:\s|$)'
+                ) then 'F'
+                else null
+            end as gender_from_patronymic
+        from names_mapping
+    ),
+
     -- ethnicity patterns from seed
     ethnicity_patterns as (
         select * from {{ ref("ethnicity_patterns") }}
@@ -337,20 +395,31 @@ with
             po.postfix,
             pe.email,
             pe.email is not null as has_personal_email,
-            case
-                when lower(replace(pf.prefix, '.', '')) in ('mr')
-                then 'M'
-                when lower(replace(pf.prefix, '.', ''))
-                    in ('ms', 'mdm', 'miss', 'mrs', 'assoc prof (ms)')
-                then 'F'
-                else null
-            end as predicted_gender,
+            -- predicted_gender: layered approach
+            -- 1. current prefix (most reliable, includes sir/lord/dame/lady)
+            -- 2. historical prefix (person was once "Ms X", now "Dr X")
+            -- 3. patronymic patterns in name (bin/s/o → M, binti/d/o → F)
+            coalesce(
+                case
+                    when lower(replace(pf.prefix, '.', ''))
+                        in ('mr', 'sir', 'lord')
+                    then 'M'
+                    when lower(replace(pf.prefix, '.', ''))
+                        in ('ms', 'mdm', 'miss', 'mrs', 'assoc prof (ms)', 'dame', 'lady')
+                    then 'F'
+                    else null
+                end,
+                hgp.gender_from_prefix,
+                pg.gender_from_patronymic
+            ) as predicted_gender,
             ec.predicted_ethnicity
         from names_mapping nm
         left join personal_emails pe on nm.canonical_name = pe.canonical_name
         left join prefixes pf on nm.canonical_name = pf.canonical_name
         left join postfixes po on nm.canonical_name = po.canonical_name
         left join ethnicity_classification ec on nm.canonical_name = ec.canonical_name
+        left join historical_gender_from_prefix hgp on nm.canonical_name = hgp.canonical_name
+        left join patronymic_gender pg on nm.canonical_name = pg.canonical_name
     )
 
 select *
