@@ -1,0 +1,61 @@
+version: 2
+
+models:
+  - name: int_personal_emails
+    description: >
+      Derives the latest personal (non-shared) email for each canonical name.
+      Excludes emails that are used by multiple people (shared/generic emails).
+    columns:
+      - name: canonical_name
+        description: The canonical name of the person
+        tests:
+          - unique
+          - not_null
+      - name: email
+        description: The latest personal email address
+      - name: has_personal_email
+        description: Always true for records in this table
+
+  - name: int_ethnicity_classification
+    description: >
+      Classifies ethnicity using Singapore's CMIO framework (Chinese, Malay, Indian, Others)
+      with name pattern matching. Classification order by distinctiveness: Malay → Indian → Chinese → Others.
+      See ethnicity_patterns seed for the patterns used.
+    columns:
+      - name: canonical_name
+        description: The canonical name of the person
+        tests:
+          - unique
+          - not_null
+      - name: predicted_ethnicity
+        description: >
+          Predicted ethnicity based on name patterns. Values: Chinese, Malay, Indian, Other, Unknown.
+        tests:
+          - accepted_values:
+              values: ['Chinese', 'Malay', 'Indian', 'Other', 'Unknown']
+
+  - name: int_gender_classification
+    description: >
+      Derives predicted gender using a layered fallback approach:
+      1. Current prefix (Mr/Ms/etc.)
+      2. Historical prefix (past prefix if current is gender-neutral like Dr)
+      3. Gendered prefix in name itself (e.g., "Ms Ruby Chopra")
+      4. Patronymic patterns (bin/s/o → M, binti/d/o → F)
+    columns:
+      - name: canonical_name
+        description: The canonical name of the person
+        tests:
+          - unique
+          - not_null
+      - name: predicted_gender
+        description: >
+          Predicted gender. Values: M (Male), F (Female), or null if unknown.
+        tests:
+          - accepted_values:
+              values: ['M', 'F']
+              config:
+                where: "predicted_gender is not null"
+      - name: gender_source
+        description: >
+          Which layer provided the gender prediction.
+          Values: current_prefix, historical_prefix, name_prefix, patronymic, or null.
