@@ -14,81 +14,82 @@ ministry_names = list(ministries_url.keys())
 organs_of_states_names = list(organs_of_state_url.keys())
 
 
-def initialise_config(args) -> tuple[str, Config]:
-    config = Config(
-        run=RunConfig(),
-        ministries=ministry_names.copy() if ministry_names else [],
-        organs_of_state=organs_of_states_names.copy() if organs_of_states_names else [],
-    )
+def _configure_extractor(
+    args,
+    extractor_flag: bool,
+    items_arg: list | None,
+    all_items: list[str],
+    name: str,
+    resume_run: bool = False,
+) -> tuple[bool, list[str], str]:
+    """Configure an extractor (ministry or organs of state).
+    
+    Returns:
+        Tuple of (enabled, items_to_run, message)
+    """
+    message = ""
+    items = all_items.copy() if all_items else []
+    
+    if extractor_flag:
+        message += f"[y]\twill run {name}_extractor\n"
+        
+        if items_arg:
+            if resume_run:
+                items = all_items[all_items.index(items_arg[0]):]
+                message += (
+                    f"[y]\t{name} specified with resume run, "
+                    f"will run from {items_arg[0]}, i.e.: {items}\n"
+                )
+            else:
+                items = items_arg
+                message += f"[y]\t{name} specified, will run {items}\n"
+        elif all_items:
+            message += f"[y]\tno {name} specified, will run all\n"
+        else:
+            message += f"[n]\tno {name} specified, no default available\n"
+        
+        return True, items, message
+    else:
+        message += f"[n]\tno {name} extraction\n"
+        if items_arg:
+            message += f"[!]\tno extraction will be run without the flag --{name}_extractor\n"
+        return False, items, message
 
+
+def initialise_config(args) -> tuple[str, Config]:
+    config = Config(run=RunConfig())
     message = "Configurations:\n"
 
-    # Ministry Extractor flag
-    if args.ministry_extractor:
-        config.run.ministry_extractor = True
-        message += "[y]\twill run ministry_extractor\n"
+    # Ministry Extractor
+    enabled, config.ministries, msg = _configure_extractor(
+        args,
+        extractor_flag=args.ministry_extractor,
+        items_arg=args.ministry,
+        all_items=ministry_names,
+        name="ministry",
+        resume_run=args.resume_run,
+    )
+    config.run.ministry_extractor = enabled
+    message += msg
 
-        if args.ministry:
-            if args.resume_run:
-                config.ministries = ministry_names[
-                    ministry_names.index(args.ministry[0]) :
-                ]
-                message += (
-                    "[y]\tministries specified with resume run, "
-                    f"will run from {args.ministry[0]}, i.e.: {config.ministries}\n"
-                )
-            else:
-                config.ministries = args.ministry
-                message += (
-                    f"[y]\tministries specified, will run {config.ministries}\n"
-                )
-
-        elif ministry_names:
-            message += "[y]\tno ministries specified, will run all\n"
-        else:
-            message += "[n]\tno ministries specified, no default available\n"
-
-    else:
-        message += "[n]\tno ministry extraction\n"
-        if args.ministry:
-            message += "[!]\tno extraction will be run without the flag --ministry_extractor or -e\n"
-
-    # Organs of State Extractor flag
-    if args.organs_of_state_extractor:
-        config.run.organs_of_state_extractor = True
-        message += "[y]\twill run organs_of_state_extractor\n"
-
-        if args.organs_of_state:
-            if args.resume_run:
-                config.organs_of_state = organs_of_states_names[
-                    organs_of_states_names.index(args.organs_of_state[0]) :
-                ]
-                message += (
-                    "[y]\torgans_of_state specified with resume run, "
-                    f"will run from {args.organs_of_state[0]}, i.e.: {config.organs_of_state}\n"
-                )
-            else:
-                config.organs_of_state = args.organs_of_state
-                message += (
-                    f"[y]\torgans_of_state specified, will run {config.organs_of_state}\n"
-                )
-
-        elif organs_of_states_names:
-            message += "[y]\tno organs_of_state specified, will run all\n"
-        else:
-            message += "[n]\tno organs_of_state specified, no default available\n"
-
-    else:
-        message += "[n]\tno organs_of_state extraction\n"
-        if args.ministry:
-            message += "[!]\tno extraction will be run without the flag --organs_of_state_extractor or -e\n"
+    # Organs of State Extractor
+    enabled, config.organs_of_state, msg = _configure_extractor(
+        args,
+        extractor_flag=args.organs_of_state_extractor,
+        items_arg=args.organs_of_state,
+        all_items=organs_of_states_names,
+        name="organs_of_state",
+        resume_run=args.resume_run,
+    )
+    config.run.organs_of_state_extractor = enabled
+    message += msg
 
     # SCD flag
     if args.slowly_changing_dimensions:
         config.run.slowly_changing_dimensions = True
         message += "[y]\twill perform SCD processing\n"
     else:
-        message += "[y]\tno SCD processing\n"
+        message += "[n]\tno SCD processing\n"
 
     # Name cleaning flag
     if args.name_cleaning:
