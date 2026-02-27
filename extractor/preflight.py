@@ -1,7 +1,13 @@
 """Pre-flight checks for the Singapore Government Directory extractor."""
 
+from __future__ import annotations
+
 import json
 import os
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from config import Config
 
 GCP_TOKEN_PATH = "token/gcp_token.json"
 
@@ -146,7 +152,7 @@ def _check_bigquery_connectivity(token_data: dict | None) -> PreflightCheck:
         return PreflightCheck("BigQuery connectivity", False, details)
 
 
-def check_requirements(config: dict) -> bool:
+def check_requirements(config: Config) -> bool:
     """Run all pre-flight checks and return True if all pass."""
     checks: list[PreflightCheck] = []
     
@@ -166,8 +172,8 @@ def check_requirements(config: dict) -> bool:
     
     # Check 3: Network (only if extraction enabled)
     needs_network = (
-        config["run"].get("ministry_extractor", False) or
-        config["run"].get("organs_of_state_extractor", False)
+        config.run.ministry_extractor or
+        config.run.organs_of_state_extractor
     )
     if needs_network:
         net_check = _check_network_connectivity()
@@ -176,10 +182,10 @@ def check_requirements(config: dict) -> bool:
     
     # Check 4: BigQuery (only if any operation needs it and GCP token is valid)
     needs_bigquery = any([
-        config["run"].get("ministry_extractor", False),
-        config["run"].get("organs_of_state_extractor", False),
-        config["run"].get("slowly_changing_dimensions", False),
-        config["run"].get("name_cleaning", False),
+        config.run.ministry_extractor,
+        config.run.organs_of_state_extractor,
+        config.run.slowly_changing_dimensions,
+        config.run.name_cleaning,
     ])
     if needs_bigquery and gcp_check.passed:
         token_data = gcp_check.data.get("token_data")
