@@ -162,9 +162,9 @@ def initialise_config(args: argparse.Namespace) -> Tuple[str, dict]:
                     f"will run from {args.organs_of_state[0]}, i.e.: {config['organs_of_state']}\n"
                 )
             else:
-                config["organs_of_state"] = args.ministry
+                config["organs_of_state"] = args.organs_of_state
                 message += (
-                    f"[y]\tministries specified, will run {config['organs_of_state']}\n"
+                    f"[y]\torgans_of_state specified, will run {config['organs_of_state']}\n"
                 )
 
         elif organs_of_states_names:
