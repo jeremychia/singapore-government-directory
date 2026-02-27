@@ -13,7 +13,6 @@ from validate_arguments import validate_ministry, validate_organs_of_state
 
 logger = get_logger(__name__)
 
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = GCP_TOKEN_PATH
 ministry_names = list(ministries_url.keys())
 organs_of_states_names = list(organs_of_state_url.keys())
 
@@ -198,6 +197,9 @@ def initialise_config(args: argparse.Namespace) -> Tuple[str, dict]:
 
 
 def main():
+    # Set GCP credentials before any GCP operations
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = GCP_TOKEN_PATH
+    
     args = parse_arguments()
     
     # Initialize logging early
