@@ -1,0 +1,93 @@
+version: 2
+
+models:
+  - name: dim_person
+    description: >
+      Stable person dimension derived from canonical names.
+      Grain: One row per unique person (identified by canonical name).
+      
+      
+      **Deduplication Strategy:**
+      
+      1. canonical_name from names_mapping is the primary identifier
+      
+      2. email is an attribute (can be null or shared by multiple people)
+      
+      3. shared/generic emails are identified and flagged
+      
+      4. for unique personal emails, we can detect if the same person appears under different canonical names
+      
+      
+      **Ethnicity Classification (CMIO Framework):**
+      
+      Uses Singapore's official CMIO (Chinese, Malay, Indian, Others) framework.
+      Classification is done via name pattern matching with the following precedence:
+      
+      1. **Malay** (most distinctive): bin/binti patterns, Islamic name prefixes (Mohammad, Ahmad, Siti, Nur), name endings (-uddin, -ullah), Malay royalty titles (Tengku, Raja)
+      
+      2. **Indian**: s/o, d/o patterns (very distinctive), Tamil/North Indian surnames (Pillai, Singh, Kumar), name prefixes (Raj, Krishna, Siva)
+      
+      3. **Other**: Eurasian surnames (de Silva, Pereira, Fernandez), Western surnames (Smith, Johnson, Williams)
+      
+      4. **Chinese**: Common Chinese surnames including Hokkien (Tan, Lim, Ong), Cantonese (Wong, Chan, Ho), Teochew (Teo, Yeo, Seah), and Mandarin (Chen, Wang, Liu)
+      
+      5. **Unknown**: Names that could not be classified
+      
+      
+      **Classification Limitations:**
+      
+      - This is a heuristic classification for aggregate statistical analysis only
+      
+      - Should NOT be used for individual identification purposes
+      
+      - Mixed heritage individuals may be misclassified
+      
+      - Adopted names or legal name changes are not accounted for
+      
+      - Some surnames appear across multiple ethnicities
+      
+      - Western-educated individuals may use anglicized names
+      
+      - Accuracy varies by ethnicity (Malay bin/binti patterns are most reliable)
+    columns:
+      - name: person_key
+        description: Surrogate key for the person
+      - name: full_name
+        description: Canonical person name (after name mapping/normalization)
+      - name: prefix
+        description: Name prefix (Mr., Ms., Dr., etc.)
+      - name: postfix
+        description: Name postfix (PhD, etc.)
+      - name: email
+        description: Most recently observed personal email address (excludes shared/generic emails)
+      - name: has_personal_email
+        description: Whether the person has a unique personal email (true) or only shared/generic emails (false)
+      - name: predicted_gender
+        description: Gender predicted from prefix (M/F/null)
+      - name: predicted_ethnicity
+        description: >
+          Ethnicity predicted using Singapore's CMIO framework.
+          Values: Chinese, Malay, Indian, Other, Unknown.
+          Based on name pattern matching - use for aggregate analysis only.
+
+  - name: dim_departments
+    description: >
+      Department dimension with aggregated information across observations.
+      Grain: One row per unique department URL.
+    columns:
+      - name: latest_department_name
+        description: Most recent name of the department
+      - name: department_names
+        description: Array of all observed department names
+      - name: parent_name
+        description: Name of the parent department
+      - name: ministry_name
+        description: Ministry the department belongs to
+      - name: effective_from
+        description: First date the department was observed
+      - name: effective_to
+        description: Last date the department was observed
+      - name: is_active
+        description: Whether the department is currently active
+      - name: department_url
+        description: URL identifier for the department

@@ -1,0 +1,75 @@
+version: 2
+
+models:
+  - name: fact_role_history
+    description: >
+      SCD Type 2 tracking of role assignments over time.
+      Grain: One row per person + department + position + stint.
+      A stint is a continuous period of employment in the same role.
+      If there's a gap of >30 days between observations, it's treated as a new stint.
+    columns:
+      - name: role_assignment_key
+        description: Surrogate key for the role assignment
+      - name: person_key
+        description: Foreign key to dim_person
+      - name: full_name
+        description: Canonical person name
+      - name: email
+        description: Email address
+      - name: position
+        description: Job title/position
+      - name: department_url
+        description: URL identifier for the department
+      - name: ministry_name
+        description: Ministry name
+      - name: observed_from
+        description: First date this role assignment was observed
+      - name: observed_to
+        description: Last date this role assignment was observed
+      - name: observation_count
+        description: Number of times this role was observed
+      - name: is_current
+        description: True if this is the person's most recent role
+
+  - name: fact_current_roles
+    description: >
+      Current role assignments for all active civil servants.
+      Grain: One row per person who is currently employed.
+      A person may have multiple rows if they hold multiple concurrent positions.
+    columns:
+      - name: role_assignment_key
+        description: Surrogate key for the role assignment
+      - name: person_key
+        description: Foreign key to dim_person
+      - name: full_name
+        description: Canonical person name
+      - name: email
+        description: Email address
+      - name: position
+        description: Current job title/position
+      - name: department_url
+        description: URL identifier for the department
+      - name: ministry_name
+        description: Ministry name
+      - name: observed_from
+        description: First date this role was observed
+      - name: observed_to
+        description: Last date this role was observed
+      - name: observation_count
+        description: Number of times this role was observed
+
+  - name: fact_people_changes
+    description: >
+      Tracks career changes for civil servants including:
+      - new joiners
+      - resignations
+      - ministry changes
+      - department changes (same or different role)
+      - role changes within same department
+      Note: Only applies to people with one position at a time.
+
+  - name: fact_extraction_sessions
+    description: Session-level extraction metadata
+
+  - name: fact_extraction_metadata
+    description: Table-level extraction metadata

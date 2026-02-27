@@ -1,0 +1,52 @@
+version: 2
+
+seeds:
+  - name: ethnicity_patterns
+    description: >
+      Pattern matching rules for ethnicity classification using Singapore's CMIO framework.
+      
+      
+      **Pattern Types:**
+      
+      - `surname`: Exact match on first word (surname) of the name
+      
+      - `pattern`: Contains match anywhere in the full name (e.g., "bin", "s/o")
+      
+      - `name_start`: Prefix match at the start of the name
+      
+      - `name_end`: Suffix match at the end of the name
+      
+      - `name`: Contains match for full name components (e.g., "Ibrahim")
+      
+      
+      **Classification Priority:**
+      
+      Patterns are checked in order of distinctiveness to minimize misclassification:
+      
+      1. Malay patterns (bin/binti are highly distinctive)
+      
+      2. Indian patterns (s/o, d/o are highly distinctive)
+      
+      3. Other surnames (Eurasian/Western - to avoid classifying as Chinese)
+      
+      4. Chinese surnames (largest group, used as catch-all for East Asian names)
+      
+      
+      **Sources:**
+      
+      - Chinese surnames: Common Hokkien, Teochew, Cantonese, and Mandarin surnames in Singapore
+      
+      - Malay patterns: Islamic naming conventions and Malay honorifics
+      
+      - Indian patterns: Tamil, Hindi, Sikh, and other South Asian naming conventions
+      
+      - Other: Portuguese/Eurasian and common Western surnames
+    columns:
+      - name: ethnicity
+        description: "Target ethnicity classification: Chinese, Malay, Indian, or Other"
+      - name: pattern_type
+        description: "How to match the pattern: surname, pattern, name_start, name_end, or name"
+      - name: pattern
+        description: The actual pattern string to match against
+      - name: notes
+        description: Explanation of the pattern's origin or usage
