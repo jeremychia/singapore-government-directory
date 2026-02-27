@@ -1,13 +1,28 @@
 # Singapore Government Directory
 
+[![Deploy Docs](https://github.com/jeremychia/singapore-government-directory/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/jeremychia/singapore-government-directory/actions/workflows/deploy-docs.yml)
+
 A data pipeline that extracts, transforms, and loads information from the [Singapore Government Directory (SGDI)](https://www.sgdi.gov.sg/) into BigQuery for analysis.
+
+## 📊 Live Dashboard
+
+View the analytics dashboard: **[jeremychia.github.io/singapore-government-directory](https://jeremychia.github.io/singapore-government-directory/)**
+
+The dashboard includes:
+- **Demographics Overview** - Gender and ethnicity distribution across the Singapore public service
+- **Ministry Breakdown** - Demographics by ministry with interactive charts
+- **Organs of State** - Separate analysis for constitutional bodies
+- **Data Quality Metrics** - Completeness tracking for gender and ethnicity fields
 
 ## Overview
 
-This project consists of two main components:
+This project consists of three main components:
 
-1. **Extractor** - Python scripts that scrape data from SGDI and load it into BigQuery
-2. **DBT** - Data transformation models that process the raw data into analytical tables
+| Component | Description |
+|-----------|-------------|
+| **Extractor** | Python scripts that scrape data from SGDI and load it into BigQuery |
+| **dbt** | Data transformation models that process raw data into analytical tables |
+| **Docs** | Static site generator for the analytics dashboard |
 
 ## Project Structure
 
@@ -20,14 +35,19 @@ This project consists of two main components:
 │   ├── utils/              # HTML downloading & parsing utilities
 │   ├── gbq/                # BigQuery utilities
 │   └── token/              # GCP credentials (gitignored)
-├── dbt/                    # DBT transformation models
+├── dbt/                    # dbt transformation models
 │   ├── models/
 │   │   ├── staging/        # Raw data staging
-│   │   ├── dimensions/     # Dimension tables
-│   │   ├── facts/          # Fact tables
-│   │   └── marts/          # Business-level aggregations
-│   └── ...
-└── requirements.txt        # Legacy requirements (use pyproject.toml instead)
+│   │   ├── intermediate/   # Intermediate transformations
+│   │   ├── dimensions/     # Dimension tables (dim_person, dim_departments)
+│   │   └── facts/          # Fact tables (fact_current_roles, fact_role_history)
+│   ├── seeds/              # Reference data (ethnicity patterns)
+│   └── analyses/           # Ad-hoc SQL analyses
+├── docs/                   # Static site generator
+│   ├── generate.py         # Dashboard generator script
+│   ├── templates/          # Jinja2 HTML templates
+│   └── dist/               # Generated output (gitignored)
+└── .github/workflows/      # CI/CD pipelines
 ```
 
 ## Prerequisites
@@ -107,9 +127,9 @@ Extract data from all organs of state:
 uv run python main.py --organs_of_state_extractor
 ```
 
-### Process Slowly Changing Dimensions
+### Process Slowly Changing Dimensions (SCD)
 
-Convert raw data into SCD format:
+Convert raw data into SCD Type 2 format for historical tracking:
 
 ```bash
 uv run python main.py --slowly_changing_dimensions
@@ -177,14 +197,56 @@ uv run python main.py --ministry_extractor --ministry "Ministry of Health" --res
 - Public Service Commission
 - The Cabinet
 
-## DBT Models
+## dbt Models
 
-To run DBT transformations:
+To run dbt transformations:
 
 ```bash
 cd dbt
-poetry install
-poetry run dbt run
+uv sync
+uv run dbt run
+```
+
+### Key Models
+
+| Model | Description |
+|-------|-------------|
+| `dim_person` | Person dimension with inferred gender and ethnicity |
+| `dim_departments` | Department hierarchy and metadata |
+| `fact_current_roles` | Current role assignments |
+| `fact_role_history` | Historical role changes (SCD Type 2) |
+| `fact_people_changes` | Personnel movements and changes |
+
+## Generating the Dashboard
+
+The analytics dashboard is automatically deployed on every push to `main`. To generate locally:
+
+```bash
+cd docs
+uv sync
+uv run python generate.py
+open dist/index.html
+```
+
+## Architecture
+
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│    SGDI     │────▶│  Extractor  │────▶│  BigQuery   │
+│  (Website)  │     │  (Python)   │     │   (Raw)     │
+└─────────────┘     └─────────────┘     └──────┬──────┘
+                                               │
+                                               ▼
+                                        ┌─────────────┐
+                                        │     DBT     │
+                                        │ (Transform) │
+                                        └──────┬──────┘
+                                               │
+                                               ▼
+                                        ┌─────────────┐     ┌─────────────┐
+                                        │  BigQuery   │────▶│  Dashboard  │
+                                        │ (Analytics) │     │   (HTML)    │
+                                        └─────────────┘     └─────────────┘
 ```
 
 ## License
