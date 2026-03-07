@@ -137,9 +137,10 @@ class PostfixExtractor:
 class NameCleaner:
     @staticmethod
     def remove_prefix_postfix(name, prefix, postfix):
-        if prefix:
+        # Handle NaN values - check if they're strings and not NaN
+        if isinstance(prefix, str) and prefix.strip():
             name = name[len(prefix) + 1 :]  # Remove prefix along with space
-        if postfix:
+        if isinstance(postfix, str) and postfix.strip():
             name = name[: -len(postfix)]  # Remove postfix
 
         return name.strip().rstrip(",")

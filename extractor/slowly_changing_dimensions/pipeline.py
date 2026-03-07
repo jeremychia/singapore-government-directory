@@ -100,8 +100,16 @@ class NameProcessor:
 
     def merge_rows(self, group):
         """Merges rows based on specified columns and aggregates _valid_from and _valid_to."""
+        
+        # When we're in a grouped context (grouped by name_uuid), name_uuid is not available as a column
+        # So we need to use the grouping columns excluding name_uuid
+        available_grouping_cols = [col for col in self.grouping_cols if col in group.columns]
+        
+        if not available_grouping_cols:
+            # If no grouping columns are available, return the group as-is
+            return group
 
-        return group.groupby(self.grouping_cols, as_index=False).agg(
+        return group.groupby(available_grouping_cols, as_index=False).agg(
             _valid_from=("_valid_from", "min"), _valid_to=("_valid_to", "max")
         )
 
