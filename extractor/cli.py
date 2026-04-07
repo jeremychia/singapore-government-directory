@@ -15,7 +15,7 @@ ARGUMENTS = [
         "flags": ["--ministry", "-m"],
         "nargs": "+",
         "type": validate_ministry,
-        "help": "Key in full name of ministry to extract from. If blank, extracts from all ministries.",
+        "help": "Full ministry name(s) to extract. If blank, extracts from all ministries.",
     },
     {
         "flags": ["--organs_of_state_extractor", "-oose"],
@@ -26,22 +26,22 @@ ARGUMENTS = [
         "flags": ["--organs_of_state", "-oos"],
         "nargs": "+",
         "type": validate_organs_of_state,
-        "help": "Key in full name of organs of state to extract from. If blank, extracts from all organs of state.",
+        "help": "Full organ(s) of state name to extract. If blank, extracts from all organs of state.",
     },
     {
         "flags": ["--resume_run", "-rr"],
         "action": "store_true",
-        "help": "Used when a run breaks and is to be continued",
+        "help": "Resume from the first specified ministry/organ after an interrupted run",
     },
     {
         "flags": ["--slowly_changing_dimensions", "-scd"],
         "action": "store_true",
-        "help": "Use this flag to run the slowly changing dimension convertor",
+        "help": "Run the Slowly Changing Dimensions (SCD) pipeline",
     },
     {
         "flags": ["--name_cleaning", "-nc"],
         "action": "store_true",
-        "help": "Use this flag to run the name cleaner",
+        "help": "Run the name cleaning and standardization pipeline",
     },
     {
         "flags": ["--check", "-c"],
@@ -62,7 +62,7 @@ ARGUMENTS = [
 
 
 def parse_arguments() -> argparse.Namespace:
-    """Parse command-line arguments."""
+    """Build and parse command-line arguments for extractor workflows."""
     parser = argparse.ArgumentParser(
         description="Singapore Government Directory Extractor"
     )

@@ -94,6 +94,25 @@ cd extractor
 pip install -e .
 ```
 
+## Quick Start (Recommended)
+
+From a fresh clone, the fastest path is:
+
+1. Put your service account key at [extractor/token/gcp_token.json](extractor/token/gcp_token.json)
+2. Install dependencies:
+       - Extractor: `cd extractor && uv sync`
+       - dbt: `cd ../dbt && uv sync`
+       - Docs: `cd ../docs && uv sync`
+3. Validate setup:
+       - `cd ../extractor`
+       - `uv run python main.py --check`
+4. Run extraction:
+       - `uv run python main.py --ministry_extractor --organs_of_state_extractor`
+5. Run transformations:
+       - `cd ../dbt && uv run dbt run`
+6. Build dashboard:
+       - `cd ../docs && uv run python generate.py`
+
 ## Usage
 
 ### Pre-flight Checks
@@ -104,6 +123,12 @@ Before running any extraction, validate that all requirements are met:
 cd extractor
 uv run python main.py --check
 ```
+
+Pre-flight checks currently validate:
+- GCP token file format and required fields
+- Required Python packages
+- Network connectivity to SGDI (when extraction is requested)
+- BigQuery connectivity and permissions (when a BigQuery-dependent job is requested)
 
 ### Extract Ministry Data
 
@@ -164,6 +189,34 @@ uv run python main.py --ministry_extractor --ministry "Ministry of Health" --res
 | `--resume_run` | `-rr` | Resume from specified ministry/organ |
 | `--check` | `-c` | Run pre-flight checks only |
 | `--skip_checks` | | Skip pre-flight checks (not recommended) |
+| `--verbose` | `-v` | Enable verbose/debug logging |
+
+## Typical Workflows
+
+### 1) Full refresh (most common)
+
+```bash
+cd extractor
+uv run python main.py --ministry_extractor --organs_of_state_extractor
+cd ../dbt
+uv run dbt run
+cd ../docs
+uv run python generate.py
+```
+
+### 2) Resume after extractor interruption
+
+```bash
+cd extractor
+uv run python main.py --ministry_extractor --ministry "Ministry of Health" --resume_run
+```
+
+### 3) Debug mode run
+
+```bash
+cd extractor
+uv run python main.py --ministry_extractor --verbose
+```
 
 ## Data Sources
 
@@ -227,6 +280,19 @@ uv sync
 uv run python generate.py
 open dist/index.html
 ```
+
+## Troubleshooting
+
+- **Pre-flight fails on token checks**
+       - Ensure [extractor/token/gcp_token.json](extractor/token/gcp_token.json) is a real service account key, not a placeholder.
+- **BigQuery permission errors (403)**
+       - Confirm service account has `BigQuery Data Editor` and `BigQuery Job User`.
+- **Extractor fails due to network issues**
+       - Re-run when SGDI is reachable, or isolate with a single ministry using `--ministry`.
+- **Partial run and missing ministries/organs**
+       - Use `--resume_run` together with `--ministry` or `--organs_of_state` to continue from a checkpoint.
+- **Need to bypass checks temporarily**
+       - Use `--skip_checks` only for controlled debugging, not normal execution.
 
 ## Architecture
 
