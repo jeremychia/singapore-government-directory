@@ -90,7 +90,7 @@ class MinistryExplorer:
             department["children"] = []
             for i, child_department in enumerate(department_info):
                 indent = "  " * depth
-                
+
                 # Track top-level progress
                 if depth == 0:
                     self.current_top_level = i + 1
@@ -98,7 +98,18 @@ class MinistryExplorer:
                     logger.info(f"{progress} {indent}→ {child_department['name']}")
                 else:
                     logger.info(f"{indent}→ {child_department['name']}")
-                
+
+                # SGDI sometimes lists a sub-unit as plain non-clickable text
+                # with no <a href> (see html_parser.extract_departments). There
+                # is no page to crawl, so record a leaf department entry
+                # without recursing instead of fetching url=None.
+                if child_department["link"] is None:
+                    self.departments_processed += 1
+                    department["children"].append(
+                        {"link": None, "name": child_department["name"]}
+                    )
+                    continue
+
                 child_names, child_departments = self.traverse_departments(
                     url=child_department["link"],
                     department_name=child_department["name"],

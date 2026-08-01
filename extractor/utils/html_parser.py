@@ -53,6 +53,13 @@ class HTMLParser:
         return section_info_divs
 
     def extract_name_info(self, department, url):
+        # From 1 Jul 2026, SGDI only lists senior-personnel contact details
+        # (GOIS scam mitigation) — junior/operational staff entries are being
+        # progressively withdrawn from department pages, so this can
+        # legitimately return far fewer rows, or [] for depts with no senior
+        # staff shown, without indicating a parsing error. extract_departments()
+        # below reads department links, not personnel, so the department tree
+        # (names + child links) is unaffected and continues to populate normally.
         soup = BeautifulSoup(self.html, "html.parser")
         info_list = []
         section_divs = []
@@ -94,7 +101,10 @@ class HTMLParser:
         return " ".join(words)
 
     def _extract_link(self, li_tag):
-        return li_tag.find("a")["href"]
+        a_tag = li_tag.find("a")
+        if a_tag is None:
+            return None
+        return a_tag.get("href")
 
     def extract_departments(self, parent_department):
         departments = []
@@ -106,6 +116,16 @@ class HTMLParser:
                 for li_tag in ul_tag.find_all("li"):
                     department_name = self._extract_department_name(li_tag)
                     department_link = self._extract_link(li_tag)
+                    if department_link is None:
+                        # SGDI renders some sub-units as plain, non-clickable
+                        # text (red, cursor:not-allowed) with no <a> tag, e.g.
+                        # "OTHER PA UNITS" / "INFRASTRUCTURE" under People's
+                        # Association. There's no page to crawl for these, but
+                        # we still record the name with link=None so the
+                        # departments table reflects the full org tree.
+                        logger.warning(
+                            f"Department '{department_name}' under '{parent_department}' has no link; recording with link=None"
+                        )
                     departments.append(
                         {
                             "name": department_name,

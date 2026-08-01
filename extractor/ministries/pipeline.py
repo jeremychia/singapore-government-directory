@@ -78,7 +78,13 @@ class MinistryDataProcessor:
 
     def explore(self):
         """Explore ministry structure and return raw data.
-        
+
+        Note: from 1 Jul 2026 SGDI is withdrawing non-senior personnel contact
+        details (GOIS scam mitigation), so `names` may shrink or go to zero for
+        a department even as the crawl succeeds. `departments` is sourced from
+        department links, not personnel, so it's unaffected and should keep
+        reflecting the full department tree regardless of `names` volume.
+
         Returns:
             tuple: (names, departments, exploration_duration)
         """
