@@ -3,7 +3,6 @@ name = "singapore-government-directory-extractor"
 version = "0.1.0"
 description = "Extracts data from the Singapore Government Directory"
 authors = [{ name = "jeremychia", email = "jeremyjchia@gmail.com" }]
-readme = "../README.md"
 requires-python = ">=3.10"
 dependencies = [
     "beautifulsoup4>=4.12.3",
